@@ -92,7 +92,7 @@ public class XURI
 
         // Extract the parts of the uri so they can
         // be modified and later reassembled
-        assert this.protocols[this.protocols.length - 1].equals(canonical(this.uri.getScheme())) : this.uri;
+        assert this.protocols[this.protocols.length - 1].equals(canonical(this.uri.getScheme()));
         this.baseprotocol = this.protocols[this.protocols.length - 1];
         this.userinfo = canonical(this.uri.getRawUserInfo());
         this.host = canonical(this.uri.getRawAuthority()); // including port
