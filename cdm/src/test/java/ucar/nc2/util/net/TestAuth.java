@@ -213,8 +213,8 @@ public class TestAuth extends UnitTestCommon
     }
 
     static AuthDataBasic[] basictests = {
-        new AuthDataBasic("http://" + REMOTESERVER + "/thredds/restricted/basicAuth",
-            "remoteUser", "remotePassword"),
+        new AuthDataBasic("http://" + REMOTESERVER + "/thredds/dodsC/restrict/testData.nc.dds",
+            "tiggeUser", "tigge"),
     };
 
     static AuthDataBasic[] redirecttests = {
@@ -263,6 +263,7 @@ public class TestAuth extends UnitTestCommon
         }
     }
 
+    @Ignore
     @Test
     public void
     testBasicDirect() throws Exception
@@ -303,6 +304,7 @@ public class TestAuth extends UnitTestCommon
         }
     }
 
+    @Ignore
     @Test
     public void
     testCache() throws Exception
@@ -356,6 +358,7 @@ public class TestAuth extends UnitTestCommon
         }
     }
 
+    @Ignore
     @Test
     public void
     testDigest() throws Exception
@@ -438,6 +441,7 @@ public class TestAuth extends UnitTestCommon
     }
 
     // This test is turned off until such time as the server can handle it.
+    @Ignore
     @Test
     public void
     testKeystore() throws Exception
@@ -483,14 +487,6 @@ public class TestAuth extends UnitTestCommon
         else
             assertTrue("testKeystore", false);
 
-            int status = method.execute();
-            System.err.printf("Execute: status code = %d\n", status);
-            pass = (status == 200);
-            if(pass)
-                assertTrue("testKeystore", true);
-            else
-                assertTrue("testKeystore", false);
-        }
     }
 
     @Test
