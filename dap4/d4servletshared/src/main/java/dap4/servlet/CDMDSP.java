@@ -252,7 +252,7 @@ public class CDMDSP extends AbstractDSP
             // Use the file path to define the dataset name
             String name = ncfile.getLocation();
             // Normalize the name
-            name = DapUtil.canonicalpath(name, false);
+            name = DapUtil.canonicalpath(name);
             // Remove any path prefix
             int index = name.lastIndexOf('/');
             if (index >= 0)
@@ -261,7 +261,7 @@ public class CDMDSP extends AbstractDSP
             dmr.setDataset(this.dmr);
             dmr.setDapVersion(DAPVERSION);
             dmr.setDMRVersion(DMRVERSION);
-            dmr.setBase(DapUtil.canonicalpath(ncfile.getLocation(), false));
+            dmr.setBase(DapUtil.canonicalpath(ncfile.getLocation()));
             dmr.setNS("http://xml.opendap.org/ns/DAP/4.0#");
 
             // Now recursively build the tree. Start by
@@ -891,7 +891,7 @@ public class CDMDSP extends AbstractDSP
             throws DapException
     {
         try {
-            path = DapUtil.canonicalpath(this.path, false);
+            path = DapUtil.canonicalpath(this.path);
             int dotpos = this.path.lastIndexOf('.');
             NetcdfFile ncfile = null;
             if (dotpos > 0 && dotpos + 1 < this.path.length()) {

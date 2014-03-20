@@ -170,16 +170,20 @@ public class TestFilters extends DapTestCommon
     {
         ConstraintTest.root = root;
         this.alltestcases.add(
-            new ConstraintTest(1, "test_one_vararray.nc", "dmr,dap", "/t[1]",
-                // S4
+            new ConstraintTest(1, "test_sequence_1.syn", "dmr,dap", "",
                 new Dump.Commands()
                 {
                     public void run(Dump printer) throws IOException
                     {
-                        printer.printvalue('S', 4);
+                        int count = printer.printcount();
+                        for(int j = 0;j < count;j++) {
+                            printer.printvalue('S', 4);
+                            printer.printvalue('S', 2);
+                        }
                         printer.printchecksum();
                     }
                 }));
+
     }
 
     //////////////////////////////////////////////////

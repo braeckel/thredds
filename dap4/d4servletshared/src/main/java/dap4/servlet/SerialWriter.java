@@ -118,6 +118,23 @@ public class SerialWriter
     encodeObject(DapType vtype, Object value)
         throws IOException
     {
+        return encodeObject(vtype,value,this.order);
+    }
+
+
+    /**
+     * Encode an array of primitive values.
+     *
+     * @param vtype The type of the object
+     * @param value The value
+     * @param order the byteorder to use
+     * @return bytebuffer encoding of the value using the
+     *         platform's native encoding.
+     */
+    static public ByteBuffer
+    encodeObject(DapType vtype, Object value, ByteOrder order)
+        throws IOException
+    {
         AtomicType atomtype = vtype.getPrimitiveType();
         int total = (int) AtomicType.getSize(atomtype);
         ByteBuffer buf = null;

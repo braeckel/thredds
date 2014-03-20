@@ -75,7 +75,7 @@ public class FakeServletRequest implements javax.servlet.http.HttpServletRequest
         String servletprefix = "/" + servletname;
         if(!path.startsWith(servletprefix))
             throw new Exception("URL path does not start with servletname: "+url.toString());
-        this.datasetpath = DapUtil.canonicalpath(path.substring(servletprefix.length()),true);
+        this.datasetpath = DapUtil.canonicalpath(path.substring(servletprefix.length()));
     }
 
     /////////////////////////////////////////////////
@@ -149,12 +149,12 @@ public class FakeServletRequest implements javax.servlet.http.HttpServletRequest
 
     public String getServerName()
     {
-        return null;
+        return "localhost";
     }
 
     public int getServerPort()
     {
-        return 0;
+        return 8080;
     }
 
     public BufferedReader getReader() throws IOException
@@ -349,7 +349,14 @@ public class FakeServletRequest implements javax.servlet.http.HttpServletRequest
 
     public String getPathInfo()
     {
-        return null;
+        String path = null;
+        if(datasetpath != null) {
+            path = datasetpath;
+            if(!path.startsWith("/"))
+                path = "/" + path;
+
+        }
+        return path;
     }
 
     public String getPathTranslated()
@@ -402,8 +409,9 @@ public class FakeServletRequest implements javax.servlet.http.HttpServletRequest
 
     public String getServletPath()
     {
-        String path = "/"+servletname;
-        if(datasetpath != null) path += "/" + datasetpath;
+        String path = servletname;
+        if(!path.startsWith("/"))
+            path = "/" + path;
         return path;
     }
 

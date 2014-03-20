@@ -38,7 +38,7 @@ abstract public class DapUtil // Should only contain static methods
     static public final int CHUNK_LITTLE_ENDIAN = 4; // bit 2: value 1
     // Construct the union of all flags
     static final public int CHUNK_ALL
-	= CHUNK_DATA | CHUNK_ERROR | CHUNK_END | CHUNK_LITTLE_ENDIAN;
+        = CHUNK_DATA | CHUNK_ERROR | CHUNK_END | CHUNK_LITTLE_ENDIAN;
 
     static final public String LF = "\n";
     static final public String CRLF = "\r\n";
@@ -49,6 +49,8 @@ abstract public class DapUtil // Should only contain static methods
 
     static final public int CHECKSUMSIZE = 4; // bytes if CRC32
     static final public String DIGESTER = "CRC32";
+
+    static final public String DRIVELETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     //////////////////////////////////////////////////
     // return last name part of an fqn; result will be escaped.
@@ -173,7 +175,7 @@ abstract public class DapUtil // Should only contain static methods
                     if((wantdir && subfile.isDirectory())
                         || (!wantdir && subfile.isFile())) {
                         // Assume this is it
-                        return DapUtil.canonicalpath(subfile.getAbsolutePath(),false);
+                        return DapUtil.canonicalpath(subfile.getAbsolutePath());
                     }
                 }
                 for(File subfile : contents) {
@@ -224,15 +226,13 @@ abstract public class DapUtil // Should only contain static methods
      * @return canonicalized version
      */
     static public String
-    canonicalpath(String path, boolean relative)
+    canonicalpath(String path)
     {
         if(path == null) return null;
         path = path.trim();
         path = path.replace('\\', '/');
         if(path.endsWith("/"))
             path = path.substring(0, path.length() - 1);
-        if(relative && path.startsWith("/"))
-            path = path.substring(1);
         return path;
     }
 
@@ -298,13 +298,13 @@ abstract public class DapUtil // Should only contain static methods
     readtextfile(InputStream stream)
         throws IOException
     {
-	StringBuilder buf = new StringBuilder();
-	InputStreamReader rdr = new InputStreamReader(stream,UTF8);
-	for(;;) {
-	    int c = rdr.read();
-	    if(c < 0) break;
-	    buf.append((char)c);
-	}
+        StringBuilder buf = new StringBuilder();
+        InputStreamReader rdr = new InputStreamReader(stream, UTF8);
+        for(;;) {
+            int c = rdr.read();
+            if(c < 0) break;
+            buf.append((char) c);
+        }
         return buf.toString();
     }
 
@@ -353,9 +353,10 @@ abstract public class DapUtil // Should only contain static methods
      * There might be multiple ones (e.g. dap4:http). Also
      * note that this will be "fooled" by Windows paths containing
      * drive letters (e.g. "C:/...").
+     *
      * @param url the url to test
      * @return list of the protocols at the front of the url.
-     *         Note that the protocol elements will not have a trailing colon.
+     * Note that the protocol elements will not have a trailing colon.
      */
     static final String protocol_re = "[a-zA-Z0-9_-]+";
 
@@ -363,11 +364,11 @@ abstract public class DapUtil // Should only contain static methods
     {
         String[] pieces = url.split("[:]");
         if(pieces.length > 1) {
-            for(int i=0;i<pieces.length;i++) {
+            for(int i = 0;i < pieces.length;i++) {
                 if(!pieces[i].matches(protocol_re)) {
-                   String[] protos = new String[i];
-                   for(int j=0;j<i;j++)
-                       protos[j] = pieces[j];
+                    String[] protos = new String[i];
+                    for(int j = 0;j < i;j++)
+                        protos[j] = pieces[j];
                     return protos;
                 }
             }
@@ -378,7 +379,7 @@ abstract public class DapUtil // Should only contain static methods
     static public long dimProduct(List<DapDimension> dimset) // dimension crossproduct
     {
         long count = 1;
-        for(DapDimension dim: dimset)
+        for(DapDimension dim : dimset)
             count *= dim.getSize();
         return count;
     }
@@ -409,7 +410,6 @@ abstract public class DapUtil // Should only contain static methods
         return u;
     }
 */
-
     static public List<Slice>
     dimsetSlices(List<DapDimension> dimset)
         throws DapException
@@ -450,7 +450,7 @@ abstract public class DapUtil // Should only contain static methods
     sliceProduct(List<Slice> slices) // another crossproduct
     {
         long count = 1;
-        for(Slice slice: slices)
+        for(Slice slice : slices)
             count *= slice.getCount();
         return count;
     }
@@ -458,11 +458,63 @@ abstract public class DapUtil // Should only contain static methods
     static public boolean
     hasStrideOne(List<Slice> slices)
     {
-        for(Slice slice: slices) {
+        for(Slice slice : slices) {
             if(slice.getStride() != 1)
                 return false;
         }
         return true;
+    }
+
+    /**
+     * Given an Array of Strings and a separator and a count,
+     * concat the first count elements of an array with separator
+     * between them. A null string is treated like "".
+     *
+     * @param array the array to concat
+     * @param sep   the separator
+     * @param from  start point for join (inclusive)
+     * @param upto  end point for join (exclusive)
+     * @return the join
+     */
+    static public String
+    join(String[] array, String sep, int from, int upto)
+    {
+        if(sep == null) sep = "";
+        if(from < 0 || upto <= from || upto > array.length)
+            throw new IndexOutOfBoundsException();
+        StringBuilder result = new StringBuilder();
+        boolean first = true;
+        for(int i = from;i < upto;i++, first = false) {
+            if(!first) result.append(sep);
+            result.append(array[i]);
+        }
+        return result.toString();
+    }
+
+    /**
+     * Relativizing a path =>  remove any leading '/' and cleaning it
+     *
+     * @param path
+     * @return
+     */
+    static public String
+    xrelpath(String path)
+    {
+        return DapUtil.canonicalpath(path);
+    }
+
+    /**
+     * return true if this path appears to start with a windows drive letter
+     * @param path
+     * @return
+     */
+    static public boolean
+    hasDriveLetter(String path)
+    {
+        if(path != null && path.length() >= 2) {
+            return (DRIVELETTERS.indexOf(path.charAt(0)) >= 0 && path.charAt(1) == ':');
+        }
+        return false;
     }
 
 } // class DapUtil

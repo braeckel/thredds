@@ -66,17 +66,11 @@ public class XURI
             // pretend it is a file:
             this.protocols = new String[]{"file"};
             path = "file://" + path;
-        } else if(this.protocols.length == 1) {
-            // See if this looks like a drive character
-            if(this.protocols[0].length() == 1) {
-                char c = this.protocols[0].charAt(0);
-                if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
-                    // looks like a drive letter
-                    this.protocols = new String[]{"file"};
-                    path = "file://" + path;
-                }
-            }
+        } else if(DapUtil.hasDriveLetter(this.protocols[0])) {
+            this.protocols = new String[]{"file"};
+            path = "file://" + path;
         }
+
         // compute the core URI
         if(this.protocols.length == 0)
             this.coreuri = path;
@@ -94,11 +88,12 @@ public class XURI
 
         // Extract the parts of the uri so they can
         // be modified and later reassembled
-        String lastproto = this.protocols[this.protocols.length-1];
+        String lastproto = this.protocols[this.protocols.length - 1];
 
         if(!lastproto.equals(canonical(this.uri.getScheme())))
-            throw new URISyntaxException(this.uri.toString(),String.format("malformed url: %s :: %s",
-                    lastproto,this.uri.getScheme()));
+            throw new URISyntaxException(this.uri.toString(),
+                String.format("malformed url: %s :: %s",
+                    lastproto, this.uri.getScheme()));
         this.baseprotocol = this.protocols[this.protocols.length - 1];
         this.userinfo = canonical(this.uri.getRawUserInfo());
         this.host = canonical(this.uri.getRawAuthority()); // including port
@@ -134,7 +129,6 @@ public class XURI
 
     //////////////////////////////////////////////////
     // Accessors
-
     public String getOriginal()
     {
         return originaluri;
@@ -197,7 +191,6 @@ public class XURI
 
     //////////////////////////////////////////////////
     // API 
-
     public String
     pureURI()
     {
@@ -228,6 +221,10 @@ public class XURI
         }
         return s;
     }
-}
 
+    public String toString()
+    {
+        return originaluri;
+    }
+}
 

@@ -39,7 +39,7 @@ public class FakeServlet extends D4TSServlet
 
     public FakeServlet(String datasetpath)
     {
-        datasetpath = DapUtil.canonicalpath(datasetpath,false);
+        datasetpath = DapUtil.canonicalpath(datasetpath);
         this.datasetpath = datasetpath;
     }
 
@@ -108,7 +108,7 @@ public class FakeServlet extends D4TSServlet
     {
         // Create the directory from which to get
         // the entries
-        suffix = DapUtil.canonicalpath(suffix,true);
+        suffix = DapUtil.canonicalpath(suffix);
         suffix = "/" + suffix; //guarantee leading /
         if(!suffix.startsWith("/WEB-INF"))
             return null;
@@ -130,7 +130,7 @@ public class FakeServlet extends D4TSServlet
 
     public java.net.URL getResource(String suffix) throws java.net.MalformedURLException
     {
-        return new URL("file://" + DapUtil.canonicalpath(getRealPath(suffix),false));
+        return new URL("file://" + DapUtil.canonicalpath(getRealPath(suffix)));
     }
 
     public InputStream getResourceAsStream(String s)
@@ -164,8 +164,8 @@ public class FakeServlet extends D4TSServlet
 
     public String getRealPath(String path)
     {
-        path = DapUtil.canonicalpath(path,true); // clean and make relative
-        path = "/" + path;
+        path = DapUtil.canonicalpath(path); // clean and make relative
+        if(!path.startsWith("/")) path = "/" + path;
         // Assume path starts with /WEB-INF
         if(!path.startsWith("/WEB-INF"))
             return null;
