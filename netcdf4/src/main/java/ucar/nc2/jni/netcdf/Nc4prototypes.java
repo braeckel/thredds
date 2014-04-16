@@ -277,9 +277,6 @@ public interface Nc4prototypes extends Library {
   /* Rename a group */
   int nc_rename_grp(int grpid, String name);
 
-  /* Rename a group */
-  int nc_rename_grp(int grpid, String name);
-
   // write array section
   int nc_put_vara(int ncid, int varid, NativeLong[] startp, NativeLong[] countp, ByteBuffer bbuff);
   int nc_put_vara_uchar(int ncid, int varid, NativeLong[] startp, NativeLong[] countp, byte[] ip);
