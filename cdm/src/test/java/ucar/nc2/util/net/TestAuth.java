@@ -213,7 +213,7 @@ public class TestAuth extends UnitTestCommon
     }
 
     static AuthDataBasic[] basictests = {
-        new AuthDataBasic("http://" + REMOTESERVER + "/thredds/restricted/basicAuth",
+        new AuthDataBasic("http://" + DEFAULTSERVER + "/thredds/restricted/basicAuth",
             "remoteUser", "remotePassword"),
     };
 
