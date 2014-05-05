@@ -18,7 +18,7 @@ public class DapTestCommon extends TestCase
     //////////////////////////////////////////////////
     // Constants
 
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
 
     static protected final Charset UTF8 = Charset.forName("UTF-8");
 
@@ -177,6 +177,7 @@ public class DapTestCommon extends TestCase
 	{
 		super(name);
 		this.title = name;
+        setSystemProperties();
 	}
 
 	public void setTitle(String title)
@@ -286,6 +287,43 @@ public class DapTestCommon extends TestCase
         System.err.println(t);
         System.err.flush();
     }
+
+    /**
+     * Try to get the system properties
+     */
+    protected void setSystemProperties()
+    {
+        if(System.getProperty("nodiff") != null)
+            prop_diff = false;
+        if(System.getProperty("baseline") != null)
+            prop_baseline = true;
+        if(System.getProperty("nogenerate") != null)
+            prop_generate = false;
+        if(System.getProperty("debug") != null)
+            prop_debug = true;
+        if(System.getProperty("visual") != null)
+            prop_visual = true;
+        if(System.getProperty("ascii") != null)
+            prop_ascii = true;
+        if(System.getProperty("utf8") != null)
+            prop_ascii = false;
+        if(prop_baseline && prop_diff)
+            prop_diff = false;
+        prop_server = System.getProperty("server");
+        prop_controls = System.getProperty("server","");
+    }
+
+    // System properties
+
+    protected boolean prop_ascii = true;
+    protected boolean prop_diff = true;
+    protected boolean prop_baseline = false;
+    protected boolean prop_visual = false;
+    protected boolean prop_debug = DEBUG;
+    protected boolean prop_generate = true;
+    protected String  prop_server = null;
+    protected String  prop_controls = null;
+
 
 }
 

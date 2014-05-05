@@ -15,11 +15,11 @@ import java.nio.ByteOrder;
 import java.util.*;
 
 /**
- * TestServlet test server side
- * constraint processing.
+ * TestFilter tests server side
+ * filter processing.
  */
 
-public class TestServletConstraints extends DapTestCommon
+public class TestFilters extends DapTestCommon
 {
 
     //////////////////////////////////////////////////
@@ -27,7 +27,7 @@ public class TestServletConstraints extends DapTestCommon
 
     static String DATADIR = "d4tests/src/test/data"; // relative to dap4 root
     static String TESTDATADIR = DATADIR + "/resources/";
-    static String BASELINEDIR = DATADIR + "/resources/TestServletConstraints/baseline";
+    static String BASELINEDIR = DATADIR + "/resources/TestFilters/baseline";
     static String TESTINPUTDIR = DATADIR + "/resources/testfiles";
 
     // constants for Fake Request
@@ -97,7 +97,7 @@ public class TestServletConstraints extends DapTestCommon
                 url += "?" + CONSTRAINTTAG + "=";
                 String ce = constraint;
                 // Escape it
-                ce = Escape.urlEncodeQuery(ce);
+                //ce = Escape.urlEncodeQuery(ce);
                 url += ce;
             }
             return url;
@@ -112,6 +112,9 @@ public class TestServletConstraints extends DapTestCommon
     //////////////////////////////////////////////////
     // Instance variables
 
+    // Misc variables
+    boolean isbigendian = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
+
     // Test cases
 
     List<ConstraintTest> alltestcases = new ArrayList<ConstraintTest>();
@@ -124,22 +127,23 @@ public class TestServletConstraints extends DapTestCommon
     //////////////////////////////////////////////////
     // Constructor(s)
 
-    public TestServletConstraints()
+    public TestFilters()
         throws Exception
     {
-        this("TestServletConstraints");
+        this("TestFilters");
     }
 
-    public TestServletConstraints(String name)
+    public TestFilters(String name)
         throws Exception
     {
         this(name, null);
     }
 
-    public TestServletConstraints(String name, String[] argv)
+    public TestFilters(String name, String[] argv)
         throws Exception
     {
         super(name);
+        setSystemProperties();
         this.root = getDAP4Root();
         if(this.root == null)
             throw new Exception("dap4 root not found");
@@ -154,8 +158,8 @@ public class TestServletConstraints extends DapTestCommon
     void
     chooseTestcases()
     {
-        if(true) {
-            chosentests = locate("test_anon_dim.syn?/vu32[0:3]");
+        if(false) {
+            chosentests = locate("test_atomic_array.nc?/vu8[1][0:2:2];/vd[1];/vs[1][0];/vo[0][1]");
         } else {
             for(ConstraintTest tc : alltestcases)
                 chosentests.add(tc);
@@ -176,84 +180,12 @@ public class TestServletConstraints extends DapTestCommon
                         printer.printchecksum();
                     }
                 }));
-        this.alltestcases.add(
-            new ConstraintTest(2, "test_anon_dim.syn", "dmr,dap", "/vu32[0:3]",  // test for dimension inclusion
-                // S4
-                new Dump.Commands()
-                {
-                    public void run(Dump printer) throws IOException
-                    {
-                        printer.printvalue('S', 4);
-                        printer.printvalue('S', 4);
-                        printer.printvalue('S', 4);
-                        printer.printvalue('S', 4);
-                        printer.printchecksum();
-                    }
-                }));
-        this.alltestcases.add(
-            new ConstraintTest(3, "test_one_vararray.nc", "dmr,dap", "/t",  // test for dimension inclusion
-                // S4
-                new Dump.Commands()
-                {
-                    public void run(Dump printer) throws IOException
-                    {
-                        printer.printvalue('S', 4);
-                        printer.printvalue('S', 4);
-                        printer.printchecksum();
-                    }
-                }));
-        this.alltestcases.add(
-            new ConstraintTest(4, "test_enum_array.nc", "dmr,dap", "/primary_cloud[1:2:4]",
-                // 2 S1
-                new Dump.Commands()
-                {
-                    public void run(Dump printer) throws IOException
-                    {
-                        for(int i = 0;i < 2;i++)
-                            printer.printvalue('U', 1, i);
-                        printer.printchecksum();
-                    }
-                }));
-        this.alltestcases.add(
-            new ConstraintTest(5, "test_atomic_array.nc", "dmr,dap", "/vu8[1][0:2:2];/vd[1];/vs[1][0];/vo[0][1]",
-                new Dump.Commands()
-                {
-                    public void run(Dump printer) throws IOException
-                    {
-                        for(int i = 0;i < 2;i++)
-                            printer.printvalue('U', 1, i);
-                        printer.printchecksum();
-                        for(int i = 0;i < 1;i++)
-                            printer.printvalue('F', 8, i);
-                        printer.printchecksum();
-                        for(int i = 0;i < 1;i++)
-                            printer.printvalue('T', 0, i);
-                        printer.printchecksum();
-                        for(int i = 0;i < 1;i++)
-                            printer.printvalue('O', 0, i);
-                        printer.printchecksum();
-                    }
-                }));
-        this.alltestcases.add(
-            new ConstraintTest(6, "test_struct_array.nc", "dmr,dap", "/s[0:2:3][0:1]",
-                new Dump.Commands()
-                {
-                    public void run(Dump printer) throws IOException
-                    {
-                        for(int i = 0;i < 4;i++) {
-                            for(int j = 0;j < 2;j++) {
-                                printer.printvalue('S', 4);
-                            }
-                        }
-                        printer.printchecksum();
-                    }
-                }));
     }
 
     //////////////////////////////////////////////////
     // Junit test methods
 
-    public void testServletConstraints()
+    public void testFilters()
         throws Exception
     {
         boolean pass = true;
@@ -364,7 +296,8 @@ public class TestServletConstraints extends DapTestCommon
             = (FakeServletOutputStream) resp.getOutputStream();
         byte[] byteresult = fakestream.toArray();
         if(prop_debug) {
-            DapDump.dumpbytes(ByteBuffer.wrap(byteresult).order(ByteOrder.nativeOrder()), true);
+            ByteOrder order = (isbigendian ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN);
+            DapDump.dumpbytes(ByteBuffer.wrap(byteresult).order(order), true);
         }
 
         // Setup a ChunkInputStream
@@ -400,7 +333,6 @@ public class TestServletConstraints extends DapTestCommon
     //////////////////////////////////////////////////
     // Utility methods
 
-
     // Locate the test cases with given prefix
     List<ConstraintTest>
     locate(String prefix)
@@ -429,4 +361,5 @@ public class TestServletConstraints extends DapTestCommon
         System.exit(0);
     }// main
 
-} // class TestServlet
+}
+

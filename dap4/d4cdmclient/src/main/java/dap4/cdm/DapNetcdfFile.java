@@ -7,7 +7,6 @@ package dap4.cdm;
 import dap4.cdmshared.CDMUtil;
 import dap4.cdmshared.NodeMap;
 import dap4.dap4shared.*;
-import org.xml.sax.SAXException;
 import ucar.ma2.*;
 import ucar.nc2.ParsedSectionSpec;
 import ucar.nc2.Variable;
@@ -17,8 +16,6 @@ import ucar.nc2.util.CancelTask;
 import java.io.IOException;
 import java.nio.channels.WritableByteChannel;
 import java.util.*;
-
-import static org.apache.http.HttpStatus.*;
 
 public class DapNetcdfFile extends ucar.nc2.NetcdfFile
 {
@@ -121,7 +118,7 @@ public class DapNetcdfFile extends ucar.nc2.NetcdfFile
         this.finalurl = url;
         cancel = (cancelTask == null ? nullcancel : cancelTask);
         // 1. Get and parse the constrained DMR and Data v-a-v URL
-        this.dsp = new D4DSP().open(url);
+        this.dsp = (D4DSP) new HttpDSP().open(url);
         // 2. Construct an equivalent CDM tree and populate 
         //    this NetcdfFile object.
         CDMCompiler compiler = new CDMCompiler(this, this.dsp);
@@ -177,7 +174,7 @@ public class DapNetcdfFile extends ucar.nc2.NetcdfFile
         return originalurl;
     }
 
-    public D4DSP getDSP()
+    public DSP getDSP()
     {
         return this.dsp;
     }

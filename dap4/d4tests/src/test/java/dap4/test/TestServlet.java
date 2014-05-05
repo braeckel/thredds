@@ -3,9 +3,9 @@ package dap4.test;
 import dap4.dap4shared.ChunkInputStream;
 import dap4.core.util.DapDump;
 import dap4.dap4shared.RequestMode;
+import dap4.servlet.Generator;
 import dap4.test.servlet.*;
-import dap4.test.util.DapTestCommon;
-import dap4.test.util.Dump;
+import dap4.test.util.*;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -83,11 +83,11 @@ public class TestServlet extends DapTestCommon
             this.xfail = xfail;
             this.checksumming = checksumming;
             this.testinputpath
-                    = root + "/" + TESTINPUTDIR + "/" + dataset;
+                = root + "/" + TESTINPUTDIR + "/" + dataset;
             this.baselinepath
-                    = root + "/" + BASELINEDIR + "/" + dataset;
+                = root + "/" + BASELINEDIR + "/" + dataset;
             this.generatepath
-                    = root + "/" + GENERATEDIR + "/" + dataset;
+                = root + "/" + GENERATEDIR + "/" + dataset;
         }
 
         String makeurl(RequestMode ext)
@@ -113,15 +113,15 @@ public class TestServlet extends DapTestCommon
         public boolean accept(File file)
         {
             boolean ok = false;
-            if (file.isFile() && file.canRead() && file.canWrite()) {
+            if(file.isFile() && file.canRead() && file.canWrite()) {
                 // Check for proper extension
                 String name = file.getName();
-                for (String ext : GENEXTENSIONS) {
-                    if (name != null && name.endsWith(ext))
+                for(String ext : GENEXTENSIONS) {
+                    if(name != null && name.endsWith(ext))
                         ok = true;
                 }
             }
-            if (!ok && debug) {
+            if(!ok && debug) {
                 System.err.println("Ignoring: " + file.toString());
             }
             return ok;
@@ -129,20 +129,8 @@ public class TestServlet extends DapTestCommon
 
     }
 
-
     //////////////////////////////////////////////////
     // Instance variables
-
-    // System properties
-
-    protected boolean prop_diff = true;
-    protected boolean prop_baseline = false;
-    protected boolean prop_visual = false;
-    protected boolean prop_debug = DEBUG;
-    protected boolean prop_generate = true;
-
-    // Misc variables
-    protected boolean isbigendian = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
 
     // Test cases
 
@@ -158,25 +146,27 @@ public class TestServlet extends DapTestCommon
     // Constructor(s)
 
     public TestServlet()
-            throws Exception
+        throws Exception
     {
         this("TestServlet");
     }
 
     public TestServlet(String name)
-            throws Exception
+        throws Exception
     {
         this(name, null);
     }
 
     public TestServlet(String name, String[] argv)
-            throws Exception
+        throws Exception
     {
         super(name);
         setSystemProperties();
+        if(prop_ascii)
+            Generator.setASCII(true);
 
         this.root = getDAP4Root();
-        if (this.root == null)
+        if(this.root == null)
             throw new Exception("dap4 root not found");
 
         this.datasetpath = this.root + "/" + DATADIR;
@@ -191,10 +181,10 @@ public class TestServlet extends DapTestCommon
     protected void
     chooseTestcases()
     {
-        if (false) {
-            chosentests = locate("test_enum.nc");
+        if(false) {
+            chosentests = locate("test_struct_array.syn");
         } else {
-            for (ServletTest tc : alltestcases) {
+            for(ServletTest tc : alltestcases) {
                 chosentests.add(tc);
             }
         }
@@ -205,223 +195,256 @@ public class TestServlet extends DapTestCommon
     {
         ServletTest.root = root;
         this.alltestcases.add(
-                new ServletTest("test_one_var.nc", "dmr,dap", true,  //0
-                        // S4
-                        new Dump.Commands()
-                        {
-                            public void run(Dump printer) throws IOException
-                            {
+            new ServletTest("test_sequence_1.syn", "dmr,dap", true,  //0
+                // S4
+                new Dump.Commands()
+                {
+                    public void run(Dump printer) throws IOException
+                    {
+                        int count = printer.printcount();
+                        for(int j = 0;j < count;j++) {
+                            printer.printvalue('S', 4);
+                            printer.printvalue('S', 2);
+                        }
+                        printer.printchecksum();
+                    }
+                }));
+        this.alltestcases.add(
+            new ServletTest("test_sequence_2.syn", "dmr,dap", true,  //0
+                // S4
+                new Dump.Commands()
+                {
+                    public void run(Dump printer) throws IOException
+                    {
+                        for(int i = 0;i < 2;i++) {
+                            int count = printer.printcount();
+                            for(int j = 0;j < count;j++) {
                                 printer.printvalue('S', 4);
-                                printer.printchecksum();
-                            }
-                        }));
-        this.alltestcases.add(
-                new ServletTest("test_opaque.nc", "dmr,dap", true,  //0
-                        // S4
-                        new Dump.Commands()
-                        {
-                            public void run(Dump printer) throws IOException
-                            {
-                                printer.printvalue('O', 0);
-                                printer.printchecksum();
-                                for (int i = 0; i < 2; i++) {
-                                    printer.printvalue('O', 0, i);
-                                }
-                                printer.printchecksum();
-                            }
-                        }));
-        this.alltestcases.add(
-                new ServletTest("test_one_vararray.nc", "dmr,dap", true,  //1
-                        // S4
-                        new Dump.Commands()
-                        {
-                            public void run(Dump printer) throws IOException
-                            {
-                                printer.printvalue('S', 4);
-                                printer.printvalue('S', 4);
-                                printer.printchecksum();
-                            }
-                        }));
-        this.alltestcases.add(
-                new ServletTest("test_enum.nc", "dmr,dap", true,   //
-                        // S1
-                        new Dump.Commands()
-                        {
-                            public void run(Dump printer) throws IOException
-                            {
-                                printer.printvalue('S', 1);
-                                printer.printchecksum();
-                            }
-                        }));
-        this.alltestcases.add(
-                new ServletTest("test_enum_array.nc", "dmr,dap", true, //3
-                        // 5 S1
-                        new Dump.Commands()
-                        {
-                            public void run(Dump printer) throws IOException
-                            {
-                                for (int i = 0; i < 5; i++) {
-                                    printer.printvalue('U', 1, i);
-                                }
-                                printer.printchecksum();
-                            }
-                        }));
-        this.alltestcases.add(
-                new ServletTest("test_atomic_types.nc", "dmr,dap", true, //4
-                        // S1 U1 S2 U2 S4 U4 S8 U8 F4 F8 C1 T O S1 S1
-                        new Dump.Commands()
-                        {
-                            public void run(Dump printer) throws IOException
-                            {
-                                printer.printvalue('S', 1);
-                                printer.printchecksum();
-                                printer.printvalue('U', 1);
-                                printer.printchecksum();
                                 printer.printvalue('S', 2);
-                                printer.printchecksum();
-                                printer.printvalue('U', 2);
-                                printer.printchecksum();
-                                printer.printvalue('S', 4);
-                                printer.printchecksum();
-                                printer.printvalue('U', 4);
-                                printer.printchecksum();
-                                printer.printvalue('S', 8);
-                                printer.printchecksum();
-                                printer.printvalue('U', 8);
-                                printer.printchecksum();
-                                printer.printvalue('F', 4);
-                                printer.printchecksum();
-                                printer.printvalue('F', 8);
-                                printer.printchecksum();
-                                printer.printvalue('C', 1);
-                                printer.printchecksum();
-                                printer.printvalue('T', 0);
-                                printer.printchecksum();
-                                printer.printvalue('O', 0);
-                                printer.printchecksum();
-                                printer.printvalue('S', 1);
-                                printer.printchecksum();
-                                printer.printvalue('S', 1);
-                                printer.printchecksum();
                             }
-                        }));
+                            printer.newline();
+                        }
+                        printer.printchecksum();
+                    }
+                }));
         this.alltestcases.add(
-                new ServletTest("test_atomic_array.nc", "dmr,dap", true,  //5
-                        // 6 U1 4 S2 6 U4 2 F8 2 C1 4 T 2 O 5 S1
-                        new Dump.Commands()
-                        {
-                            public void run(Dump printer) throws IOException
-                            {
-                                for (int i = 0; i < 6; i++) {
-                                    printer.printvalue('U', 1, i);
-                                }
-                                printer.printchecksum();
-                                for (int i = 0; i < 4; i++) {
-                                    printer.printvalue('S', 2, i);
-                                }
-                                printer.printchecksum();
-                                for (int i = 0; i < 6; i++) {
-                                    printer.printvalue('U', 4, i);
-                                }
-                                printer.printchecksum();
-                                for (int i = 0; i < 2; i++) {
-                                    printer.printvalue('F', 8, i);
-                                }
-                                printer.printchecksum();
-                                for (int i = 0; i < 2; i++) {
-                                    printer.printvalue('C', 1, i);
-                                }
-                                printer.printchecksum();
-                                for (int i = 0; i < 4; i++) {
-                                    printer.printvalue('T', 0, i);
-                                }
-                                printer.printchecksum();
-                                for (int i = 0; i < 2; i++) {
-                                    printer.printvalue('O', 0, i);
-                                }
-                                printer.printchecksum();
-                                for (int i = 0; i < 5; i++) {
-                                    printer.printvalue('S', 1, i);
-                                }
-                                printer.printchecksum();
-                            }
-                        }));
+            new ServletTest("test_one_var.nc", "dmr,dap", true,  //0
+                // S4
+                new Dump.Commands()
+                {
+                    public void run(Dump printer) throws IOException
+                    {
+                        printer.printvalue('S', 4);
+                        printer.printchecksum();
+                    }
+                }));
         this.alltestcases.add(
-                new ServletTest("test_groups1.nc", "dmr,dap", true,   //6
-                        //5 S4 3 F4 5 S4 7 F4",
-                        new Dump.Commands()
-                        {
-                            public void run(Dump printer) throws IOException
-                            {
-                                for (int i = 0; i < 5; i++) {
-                                    printer.printvalue('S', 4, i);
-                                }
-                                printer.printchecksum();
-                                for (int i = 0; i < 3; i++) {
-                                    printer.printvalue('F', 4, i);
-                                }
-                                printer.printchecksum();
-                                for (int i = 0; i < 5; i++) {
-                                    printer.printvalue('S', 4, i);
-                                }
-                                printer.printchecksum();
-                                for (int i = 0; i < 7; i++) {
-                                    printer.printvalue('F', 4, i);
-                                }
-                                printer.printchecksum();
-                            }
-                        }));
+            new ServletTest("test_opaque.nc", "dmr,dap", true,  //0
+                // S4
+                new Dump.Commands()
+                {
+                    public void run(Dump printer) throws IOException
+                    {
+                        printer.printvalue('O', 0);
+                        printer.printchecksum();
+                        for(int i = 0;i < 2;i++) {
+                            printer.printvalue('O', 0, i);
+                        }
+                        printer.printchecksum();
+                    }
+                }));
         this.alltestcases.add(
-                new ServletTest("test_struct_type.nc", "dmr,dap", true,  //7
-                        // { S4 S4 }
-                        new Dump.Commands()
-                        {
-                            public void run(Dump printer) throws IOException
-                            {
-                                printer.printvalue('S', 4);
-                                printer.printvalue('S', 4);
-                                printer.printchecksum();
-                            }
-                        }));
+            new ServletTest("test_one_vararray.nc", "dmr,dap", true,  //1
+                // S4
+                new Dump.Commands()
+                {
+                    public void run(Dump printer) throws IOException
+                    {
+                        printer.printvalue('S', 4);
+                        printer.printvalue('S', 4);
+                        printer.printchecksum();
+                    }
+                }));
         this.alltestcases.add(
-                new ServletTest("test_utf8.nc", "dmr,dap", true,  //9
-                        // 2 { S4 S4 }
-                        new Dump.Commands()
-                        {
-                            public void run(Dump printer) throws IOException
-                            {
-                                for (int i = 0; i < 2; i++) {
-                                    printer.printvalue('T', 0, i);
-                                    printer.format("\n");
-                                }
-                                printer.printchecksum();
-                            }
-                        }));
+            new ServletTest("test_enum.nc", "dmr,dap", true,   //
+                // S1
+                new Dump.Commands()
+                {
+                    public void run(Dump printer) throws IOException
+                    {
+                        printer.printvalue('S', 1);
+                        printer.printchecksum();
+                    }
+                }));
         this.alltestcases.add(
-                new ServletTest("test_struct_nested.hdf5", "dmr,dap", true,    // 10
-                        // { { S4 S4 } { S4 S4 } }
-                        new Dump.Commands()
-                        {
-                            public void run(Dump printer) throws IOException
-                            {
-                                printer.printvalue('S', 4);
-                                printer.printvalue('S', 4);
-                                printer.printvalue('S', 4);
-                                printer.printvalue('S', 4);
-                                printer.printchecksum();
-                            }
-                        }));
+            new ServletTest("test_enum_array.nc", "dmr,dap", true, //3
+                // 5 S1
+                new Dump.Commands()
+                {
+                    public void run(Dump printer) throws IOException
+                    {
+                        for(int i = 0;i < 5;i++) {
+                            printer.printvalue('U', 1, i);
+                        }
+                        printer.printchecksum();
+                    }
+                }));
         this.alltestcases.add(
-                new ServletTest("test_struct_nested3.hdf5", "dmr,dap", true,
-                        // { { {S4 } } }
-                        new Dump.Commands()
-                        {
-                            public void run(Dump printer) throws IOException
-                            {
-                                printer.printvalue('S', 4);
-                                printer.printchecksum();
-                            }
-                        }));
+            new ServletTest("test_atomic_types.nc", "dmr,dap", true, //4
+                // S1 U1 S2 U2 S4 U4 S8 U8 F4 F8 C1 T O S1 S1
+                new Dump.Commands()
+                {
+                    public void run(Dump printer) throws IOException
+                    {
+                        printer.printvalue('S', 1);
+                        printer.printchecksum();
+                        printer.printvalue('U', 1);
+                        printer.printchecksum();
+                        printer.printvalue('S', 2);
+                        printer.printchecksum();
+                        printer.printvalue('U', 2);
+                        printer.printchecksum();
+                        printer.printvalue('S', 4);
+                        printer.printchecksum();
+                        printer.printvalue('U', 4);
+                        printer.printchecksum();
+                        printer.printvalue('S', 8);
+                        printer.printchecksum();
+                        printer.printvalue('U', 8);
+                        printer.printchecksum();
+                        printer.printvalue('F', 4);
+                        printer.printchecksum();
+                        printer.printvalue('F', 8);
+                        printer.printchecksum();
+                        printer.printvalue('C', 1);
+                        printer.printchecksum();
+                        printer.printvalue('T', 0);
+                        printer.printchecksum();
+                        printer.printvalue('O', 0);
+                        printer.printchecksum();
+                        printer.printvalue('S', 1);
+                        printer.printchecksum();
+                        printer.printvalue('S', 1);
+                        printer.printchecksum();
+                    }
+                }));
+        this.alltestcases.add(
+            new ServletTest("test_atomic_array.nc", "dmr,dap", true,  //5
+                // 6 U1 4 S2 6 U4 2 F8 2 C1 4 T 2 O 5 S1
+                new Dump.Commands()
+                {
+                    public void run(Dump printer) throws IOException
+                    {
+                        for(int i = 0;i < 6;i++) {
+                            printer.printvalue('U', 1, i);
+                        }
+                        printer.printchecksum();
+                        for(int i = 0;i < 4;i++) {
+                            printer.printvalue('S', 2, i);
+                        }
+                        printer.printchecksum();
+                        for(int i = 0;i < 6;i++) {
+                            printer.printvalue('U', 4, i);
+                        }
+                        printer.printchecksum();
+                        for(int i = 0;i < 2;i++) {
+                            printer.printvalue('F', 8, i);
+                        }
+                        printer.printchecksum();
+                        for(int i = 0;i < 2;i++) {
+                            printer.printvalue('C', 1, i);
+                        }
+                        printer.printchecksum();
+                        for(int i = 0;i < 4;i++) {
+                            printer.printvalue('T', 0, i);
+                        }
+                        printer.printchecksum();
+                        for(int i = 0;i < 2;i++) {
+                            printer.printvalue('O', 0, i);
+                        }
+                        printer.printchecksum();
+                        for(int i = 0;i < 5;i++) {
+                            printer.printvalue('S', 1, i);
+                        }
+                        printer.printchecksum();
+                    }
+                }));
+        this.alltestcases.add(
+            new ServletTest("test_groups1.nc", "dmr,dap", true,   //6
+                //5 S4 3 F4 5 S4 7 F4",
+                new Dump.Commands()
+                {
+                    public void run(Dump printer) throws IOException
+                    {
+                        for(int i = 0;i < 5;i++) {
+                            printer.printvalue('S', 4, i);
+                        }
+                        printer.printchecksum();
+                        for(int i = 0;i < 3;i++) {
+                            printer.printvalue('F', 4, i);
+                        }
+                        printer.printchecksum();
+                        for(int i = 0;i < 5;i++) {
+                            printer.printvalue('S', 4, i);
+                        }
+                        printer.printchecksum();
+                        for(int i = 0;i < 7;i++) {
+                            printer.printvalue('F', 4, i);
+                        }
+                        printer.printchecksum();
+                    }
+                }));
+        this.alltestcases.add(
+            new ServletTest("test_struct_type.nc", "dmr,dap", true,  //7
+                // { S4 S4 }
+                new Dump.Commands()
+                {
+                    public void run(Dump printer) throws IOException
+                    {
+                        printer.printvalue('S', 4);
+                        printer.printvalue('S', 4);
+                        printer.printchecksum();
+                    }
+                }));
+        this.alltestcases.add(
+            new ServletTest("test_utf8.nc", "dmr,dap", true,  //9
+                // 2 { S4 S4 }
+                new Dump.Commands()
+                {
+                    public void run(Dump printer) throws IOException
+                    {
+                        for(int i = 0;i < 2;i++) {
+                            printer.printvalue('T', 0, i);
+                            printer.format("\n");
+                        }
+                        printer.printchecksum();
+                    }
+                }));
+        this.alltestcases.add(
+            new ServletTest("test_struct_nested.hdf5", "dmr,dap", true,    // 10
+                // { { S4 S4 } { S4 S4 } }
+                new Dump.Commands()
+                {
+                    public void run(Dump printer) throws IOException
+                    {
+                        printer.printvalue('S', 4);
+                        printer.printvalue('S', 4);
+                        printer.printvalue('S', 4);
+                        printer.printvalue('S', 4);
+                        printer.printchecksum();
+                    }
+                }));
+        this.alltestcases.add(
+            new ServletTest("test_struct_nested3.hdf5", "dmr,dap", true,
+                // { { {S4 } } }
+                new Dump.Commands()
+                {
+                    public void run(Dump printer) throws IOException
+                    {
+                        printer.printvalue('S', 4);
+                        printer.printchecksum();
+                    }
+                }));
 /*Not currently working
         this.alltestcases.add(
             new ServletTest("test_vlen1.nc", "dmr,dap", true,
@@ -505,119 +528,119 @@ public class TestServlet extends DapTestCommon
                 }));
 */
         this.alltestcases.add(
-                new ServletTest("test_anon_dim.syn", "dmr,dap", true,  //0
-                        // S4
-                        new Dump.Commands()
-                        {
-                            public void run(Dump printer) throws IOException
-                            {
-                                for (int i = 0; i < 6; i++) {
-                                    printer.printvalue('S', 4, i);
-                                }
-                                printer.printchecksum();
-                            }
-                        }));
+            new ServletTest("test_anon_dim.syn", "dmr,dap", true,  //0
+                // S4
+                new Dump.Commands()
+                {
+                    public void run(Dump printer) throws IOException
+                    {
+                        for(int i = 0;i < 6;i++) {
+                            printer.printvalue('S', 4, i);
+                        }
+                        printer.printchecksum();
+                    }
+                }));
         this.alltestcases.add(
-                new ServletTest("test_atomic_types.syn", "dmr,dap", true, //4
-                        // S1 U1 S2 U2 S4 U4 S8 U8 F4 F8 C1 T O S1 S1
-                        new Dump.Commands()
-                        {
-                            public void run(Dump printer) throws IOException
-                            {
-                                printer.printvalue('S', 1);
-                                printer.printchecksum();
-                                printer.printvalue('U', 1);
-                                printer.printchecksum();
-                                printer.printvalue('S', 2);
-                                printer.printchecksum();
-                                printer.printvalue('U', 2);
-                                printer.printchecksum();
+            new ServletTest("test_atomic_types.syn", "dmr,dap", true, //4
+                // S1 U1 S2 U2 S4 U4 S8 U8 F4 F8 C1 T O S1 S1
+                new Dump.Commands()
+                {
+                    public void run(Dump printer) throws IOException
+                    {
+                        printer.printvalue('S', 1);
+                        printer.printchecksum();
+                        printer.printvalue('U', 1);
+                        printer.printchecksum();
+                        printer.printvalue('S', 2);
+                        printer.printchecksum();
+                        printer.printvalue('U', 2);
+                        printer.printchecksum();
+                        printer.printvalue('S', 4);
+                        printer.printchecksum();
+                        printer.printvalue('U', 4);
+                        printer.printchecksum();
+                        printer.printvalue('S', 8);
+                        printer.printchecksum();
+                        printer.printvalue('U', 8);
+                        printer.printchecksum();
+                        printer.printvalue('F', 4);
+                        printer.printchecksum();
+                        printer.printvalue('F', 8);
+                        printer.printchecksum();
+                        printer.printvalue('C', 1);
+                        printer.printchecksum();
+                        printer.printvalue('T', 0);
+                        printer.printchecksum();
+                        printer.printvalue('O', 0);
+                        printer.printchecksum();
+                        printer.printvalue('S', 1);
+                        printer.printchecksum();
+                        printer.printvalue('S', 1);
+                        printer.printchecksum();
+                    }
+                }));
+        this.alltestcases.add(
+            new ServletTest("test_atomic_array.syn", "dmr,dap", true,  //5
+                // 6 U1 4 S2 6 U4 2 F8 2 C1 4 T 2 O 5 S1
+                new Dump.Commands()
+                {
+                    public void run(Dump printer) throws IOException
+                    {
+                        for(int i = 0;i < 6;i++) {
+                            printer.printvalue('U', 1, i);
+                        }
+                        printer.printchecksum();
+                        for(int i = 0;i < 4;i++) {
+                            printer.printvalue('S', 2, i);
+                        }
+                        printer.printchecksum();
+                        for(int i = 0;i < 6;i++) {
+                            printer.printvalue('U', 4, i);
+                        }
+                        printer.printchecksum();
+                        for(int i = 0;i < 2;i++) {
+                            printer.printvalue('F', 8, i);
+                        }
+                        printer.printchecksum();
+                        for(int i = 0;i < 2;i++) {
+                            printer.printvalue('C', 1, i);
+                        }
+                        printer.printchecksum();
+                        for(int i = 0;i < 4;i++) {
+                            printer.printvalue('T', 0, i);
+                        }
+                        printer.printchecksum();
+                        for(int i = 0;i < 2;i++) {
+                            printer.printvalue('O', 0, i);
+                        }
+                        printer.printchecksum();
+                        for(int i = 0;i < 5;i++) {
+                            printer.printvalue('S', 1, i);
+                        }
+                        printer.printchecksum();
+                    }
+                }));
+        this.alltestcases.add(
+            new ServletTest("test_struct_array.syn", "dmr,dap", true,  //8
+                // 12 { S4 S4 }
+                new Dump.Commands()
+                {
+                    public void run(Dump printer) throws IOException
+                    {
+                        for(int i = 0;i < 4;i++) {
+                            for(int j = 0;j < 3;j++) {
+                                printer.printvalue('S', 4, i);
+                                printer.format(" ");
                                 printer.printvalue('S', 4);
-                                printer.printchecksum();
-                                printer.printvalue('U', 4);
-                                printer.printchecksum();
-                                printer.printvalue('S', 8);
-                                printer.printchecksum();
-                                printer.printvalue('U', 8);
-                                printer.printchecksum();
-                                printer.printvalue('F', 4);
-                                printer.printchecksum();
-                                printer.printvalue('F', 8);
-                                printer.printchecksum();
-                                printer.printvalue('C', 1);
-                                printer.printchecksum();
-                                printer.printvalue('T', 0);
-                                printer.printchecksum();
-                                printer.printvalue('O', 0);
-                                printer.printchecksum();
-                                printer.printvalue('S', 1);
-                                printer.printchecksum();
-                                printer.printvalue('S', 1);
-                                printer.printchecksum();
+                                printer.format("\n");
                             }
-                        }));
-        this.alltestcases.add(
-                new ServletTest("test_atomic_array.syn", "dmr,dap", true,  //5
-                        // 6 U1 4 S2 6 U4 2 F8 2 C1 4 T 2 O 5 S1
-                        new Dump.Commands()
-                        {
-                            public void run(Dump printer) throws IOException
-                            {
-                                for (int i = 0; i < 6; i++) {
-                                    printer.printvalue('U', 1, i);
-                                }
-                                printer.printchecksum();
-                                for (int i = 0; i < 4; i++) {
-                                    printer.printvalue('S', 2, i);
-                                }
-                                printer.printchecksum();
-                                for (int i = 0; i < 6; i++) {
-                                    printer.printvalue('U', 4, i);
-                                }
-                                printer.printchecksum();
-                                for (int i = 0; i < 2; i++) {
-                                    printer.printvalue('F', 8, i);
-                                }
-                                printer.printchecksum();
-                                for (int i = 0; i < 2; i++) {
-                                    printer.printvalue('C', 1, i);
-                                }
-                                printer.printchecksum();
-                                for (int i = 0; i < 4; i++) {
-                                    printer.printvalue('T', 0, i);
-                                }
-                                printer.printchecksum();
-                                for (int i = 0; i < 2; i++) {
-                                    printer.printvalue('O', 0, i);
-                                }
-                                printer.printchecksum();
-                                for (int i = 0; i < 5; i++) {
-                                    printer.printvalue('S', 1, i);
-                                }
-                                printer.printchecksum();
-                            }
-                        }));
-        this.alltestcases.add(
-                new ServletTest("test_struct_array.syn", "dmr,dap", true,  //8
-                        // 12 { S4 S4 }
-                        new Dump.Commands()
-                        {
-                            public void run(Dump printer) throws IOException
-                            {
-                                for (int i = 0; i < 4; i++) {
-                                    for (int j = 0; j < 3; j++) {
-                                        printer.printvalue('S', 4, i);
-                                        printer.format(" ");
-                                        printer.printvalue('S', 4);
-                                        printer.format("\n");
-                                    }
-                                }
-                                printer.printchecksum();
-                            }
-                        }));
+                        }
+                        printer.printchecksum();
+                    }
+                }));
         // XFAIL tests
         this.alltestcases.add(
-                new ServletTest("test_struct_array.nc", "dmr", true)
+            new ServletTest("test_struct_array.nc", "dmr", true)
         );
     }
 
@@ -626,9 +649,9 @@ public class TestServlet extends DapTestCommon
     // Junit test methods
 
     public void testServlet()
-            throws Exception
+        throws Exception
     {
-        for (ServletTest testcase : chosentests) {
+        for(ServletTest testcase : chosentests) {
             assertTrue(doOneTest(testcase));
         }
     }
@@ -637,13 +660,13 @@ public class TestServlet extends DapTestCommon
     // Primary test method
     boolean
     doOneTest(ServletTest testcase)
-            throws Exception
+        throws Exception
     {
         boolean pass = true;
 
         System.out.println("Testcase: " + testcase.testinputpath);
 
-        for (String extension : testcase.extensions) {
+        for(String extension : testcase.extensions) {
             RequestMode ext = RequestMode.modeFor(extension);
             switch (ext) {
             case DMR:
@@ -654,16 +677,16 @@ public class TestServlet extends DapTestCommon
                 break;
             default:
                 assert (false);
-                if (!pass) break;
+                if(!pass) break;
             }
-            if (!pass) break;
+            if(!pass) break;
         }
         return pass;
     }
 
     boolean
     dodmr(ServletTest testcase)
-            throws Exception
+        throws Exception
     {
         boolean pass = true;
 
@@ -689,11 +712,11 @@ public class TestServlet extends DapTestCommon
         // Test by converting the raw output to a string
 
         String sdmr = new String(byteresult, UTF8);
-        if (prop_visual)
+        if(prop_visual)
             visual(testcase.title + ".dmr", sdmr);
-        if (!testcase.xfail && prop_baseline) {
+        if(!testcase.xfail && prop_baseline) {
             writefile(testcase.baselinepath + ".dmr", sdmr);
-        } else if (prop_diff) { //compare with baseline
+        } else if(prop_diff) { //compare with baseline
             // Read the baseline file
             String baselinecontent = readfile(testcase.baselinepath + ".dmr");
             System.out.println("DMR Comparison: vs " + testcase.baselinepath + ".dmr");
@@ -705,7 +728,7 @@ public class TestServlet extends DapTestCommon
 
     boolean
     dodata(ServletTest testcase)
-            throws Exception
+        throws Exception
     {
         boolean pass = true;
         String baseline;
@@ -730,38 +753,45 @@ public class TestServlet extends DapTestCommon
 
         // Collect the output
         FakeServletOutputStream fakestream
-                = (FakeServletOutputStream) resp.getOutputStream();
-        byte[] byteresult = fakestream.toArray();
-        if (prop_debug) {
-            ByteOrder order = (isbigendian ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN);
-            DapDump.dumpbytes(ByteBuffer.wrap(byteresult).order(order), true);
+            = (FakeServletOutputStream) resp.getOutputStream();
+        if(prop_debug || DEBUG) {
+            DapDump.dumpbytestream(fakestream.byteStream(),ByteOrder.nativeOrder(),'*');
         }
+        byte[] byteresult = fakestream.toArray();
 
-        if (!testcase.xfail && prop_generate) {
+        if(!testcase.xfail && prop_generate) {
             // Dump the serialization into a file; this also includes the dmr
             String target = testcase.generatepath + ".raw";
             writefile(target, byteresult);
         }
 
+        if(DEBUG) {
+            System.out.println("///////////////////");
+            ByteBuffer datab = ByteBuffer.wrap(byteresult).order(ByteOrder.nativeOrder());
+            DapDump.dumpbytes(datab,true);
+            System.out.println("///////////////////");
+            System.out.flush();
+        }
+
         // Setup a ChunkInputStream
         ByteArrayInputStream bytestream = new ByteArrayInputStream(byteresult);
 
-        ChunkInputStream reader = new ChunkInputStream(bytestream, RequestMode.DAP, isbigendian);
+        ChunkInputStream reader = new ChunkInputStream(bytestream, RequestMode.DAP, ByteOrder.nativeOrder());
 
         String sdmr = reader.readDMR(); // Read the DMR
-        if (prop_visual)
+        if(prop_visual)
             visual(testcase.title + ".dmr.dap", sdmr);
 
         Dump printer = new Dump();
         String sdata = printer.dumpdata(reader, testcase.checksumming, reader.getByteOrder(), testcase.template);
 
-        if (prop_visual)
+        if(prop_visual)
             visual(testcase.title + ".dap", sdata);
 
-        if (!testcase.xfail && prop_baseline)
+        if(!testcase.xfail && prop_baseline)
             writefile(testcase.baselinepath + ".dap", sdata);
 
-        if (prop_diff) {
+        if(prop_diff) {
             //compare with baseline
             // Read the baseline file
             System.out.println("Note Comparison:");
@@ -779,15 +809,15 @@ public class TestServlet extends DapTestCommon
     boolean
     generatesetup()
     {
-        if (!prop_generate)
+        if(!prop_generate)
             return false;
         File genpath = new File(root + "/" + GENERATEDIR);
-        if (!genpath.exists()) {// create generate dir if it does not exist
-            if (!genpath.mkdirs())
+        if(!genpath.exists()) {// create generate dir if it does not exist
+            if(!genpath.mkdirs())
                 return report("Cannot create: " + genpath.toString());
-        } else if (!genpath.isDirectory())
+        } else if(!genpath.isDirectory())
             return report("Not a directory: " + genpath.toString());
-        else if (!genpath.canWrite())
+        else if(!genpath.canWrite())
             return report("Directory not writeable: " + genpath.toString());
         // Clear the generate directory, but of files only
         clearDir(genpath, false);
@@ -802,32 +832,14 @@ public class TestServlet extends DapTestCommon
         return false;
     }
 
-    /**
-     * Try to get the system properties
-     */
-    void setSystemProperties()
-    {
-        if (System.getProperty("nodiff") != null)
-            prop_diff = false;
-        String value = System.getProperty("baseline");
-        if (value != null) prop_baseline = true;
-        value = System.getProperty("nogenerate");
-        if (value != null) prop_generate = false;
-        value = System.getProperty("debug");
-        if (value != null) prop_debug = true;
-        if (System.getProperty("visual") != null)
-            prop_visual = true;
-        if (prop_baseline && prop_diff)
-            prop_diff = false;
-    }
 
     // Locate the test cases with given prefix
     List<ServletTest>
     locate(String prefix)
     {
         List<ServletTest> results = new ArrayList<ServletTest>();
-        for (ServletTest ct : this.alltestcases) {
-            if (ct.dataset.startsWith(prefix))
+        for(ServletTest ct : this.alltestcases) {
+            if(ct.dataset.startsWith(prefix))
                 results.add(ct);
         }
         return results;

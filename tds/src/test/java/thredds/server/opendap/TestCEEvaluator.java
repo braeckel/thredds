@@ -52,7 +52,7 @@ import java.util.Enumeration;
 
 public class TestCEEvaluator extends TestCase
 {
-    static boolean debug = true;
+    static boolean debug = false;
 
     static  boolean generate = false;
 

@@ -32,9 +32,6 @@ public class CDMDSP extends AbstractDSP
 
     static protected final Object FACTORYKEY = DapFactory.class;
 
-    // Define the extension that marks synthetic data.
-    static protected final String SYNTHETICTAG = ".syn";
-
     static protected final String DAPVERSION = "4.0";
     static protected final String DMRVERSION = "1.0";
 
@@ -77,7 +74,6 @@ public class CDMDSP extends AbstractDSP
 
     protected NetcdfDataset ncfile = null;
 
-    protected DapDataset dmr = null; // Root of the DMR
     protected DapFactory factory = null;
 
     // Map between cdmnode and dapnode
@@ -103,7 +99,10 @@ public class CDMDSP extends AbstractDSP
     public CDMDSP(String path, DapContext cxt)
             throws DapException
     {
-        super(path, cxt);
+        super();
+        setContext(cxt);
+        setPath(path);
+
         ncfile = (NetcdfDataset) createNetcdfFile();
         if (ncfile == null)
             throw new DapException("CDMDSP: cannot open: " + path);
@@ -117,10 +116,10 @@ public class CDMDSP extends AbstractDSP
     //////////////////////////////////////////////////
     // DSP Interface
 
-    @Override
-    public boolean match(String path, DapContext context)
+    // This is intended to be the last DSP checked
+    static public boolean match(String path, DapContext context)
     {
-        return (path.indexOf(SYNTHETICTAG) < 0);
+        return true;
     }
 
     @Override
@@ -278,8 +277,9 @@ public class CDMDSP extends AbstractDSP
             /* Walk looking for VariableDS instances */
             processmappedvariables(ncfile.getRootGroup());
 
-            // Not set the view
-            super.setDataset(dmr);
+            // Now set the view
+            dmr.finish();
+            setDataset(dmr);
 
         } catch (DapException e) {
             throw new DapException(e);

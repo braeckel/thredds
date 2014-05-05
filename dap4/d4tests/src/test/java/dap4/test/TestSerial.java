@@ -1,6 +1,7 @@
 package dap4.test;
 
 import   dap4.cdm.DapNetcdfFile;
+import dap4.dap4shared.HttpDSP;
 import dap4.test.util.DapTestCommon;
 import ucar.nc2.dataset.NetcdfDataset;
 
@@ -86,14 +87,6 @@ public class TestSerial extends DapTestCommon
 
     //////////////////////////////////////////////////
     // Instance variables
-
-    // System properties
-
-    protected boolean prop_diff = true;
-    protected boolean prop_baseline = false;
-    protected boolean prop_visual = false;
-    protected boolean prop_debug = DEBUG;
-    protected String prop_server = null;
 
     // Test cases
 
@@ -283,20 +276,6 @@ public class TestSerial extends DapTestCommon
     //////////////////////////////////////////////////
     // Utility methods
 
-    /**
-     * Try to get the system properties
-     */
-    void setSystemProperties()
-    {
-        prop_diff = (System.getProperty("nodiff") == null);
-        prop_baseline = (System.getProperty("baseline") != null);
-        prop_visual = (System.getProperty("visual") != null);
-        if(System.getProperty("debug") != null)
-            prop_debug = true;
-        prop_server = System.getProperty("server");
-        if(prop_diff && prop_baseline)
-            prop_diff = false;
-    }
 
     // Locate the test cases with given prefix
     ClientTest
@@ -371,7 +350,7 @@ public class TestSerial extends DapTestCommon
         System.err.print("Checking for sourceurl: " + candidate.prefix);
         try {
             DapNetcdfFile dcfile = new DapNetcdfFile(this.sourceurl);
-            String document = dcfile.getDSP().getCapabilities(candidate.prefix);
+            String document = ((HttpDSP)(dcfile.getDSP())).getCapabilities(candidate.prefix);
             System.err.println(" ; found");
             return true;
         } catch (IOException ie) {

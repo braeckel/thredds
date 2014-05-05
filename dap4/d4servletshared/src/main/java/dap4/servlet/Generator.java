@@ -9,6 +9,7 @@ import dap4.core.dmr.*;
 import dap4.core.util.*;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
 
@@ -17,7 +18,7 @@ import static dap4.servlet.Value.ValueSource;
 /**
  * Given a DMR, return:
  * 1. A byte array (byte[]) containing serialized data
- * and DMR
+ * and (optionally) the DMR
  * <p/>
  * Requirements:
  * 1. repeatability: given the same DMR, return the same byte array
@@ -48,7 +49,13 @@ public class Generator extends DapSerializer
     static final String SRCEXT = ".dmr" + SERIALEXT;
     static final String DSTEXT = ".dap" + SERIALEXT;
 
-    ValueSource source = null;
+    static final int MAXROWS = 5;
+
+    //////////////////////////////////////////////////
+    // static methods
+    protected static boolean asciionly = true;
+
+    static public void setASCII(boolean tf) {asciionly = tf;}
 
     //////////////////////////////////////////////////
     // Instance variables
@@ -58,6 +65,7 @@ public class Generator extends DapSerializer
     protected byte[] serialization = null;
     protected ChunkWriter cw = null;
     protected CEConstraint ce = null;
+    protected boolean withdmr = true;
 
     //////////////////////////////////////////////////
     // Constructor(s)
@@ -75,6 +83,7 @@ public class Generator extends DapSerializer
             values = new RandomValue();
             break;
         }
+        values.setASCII(asciionly);
         SerialWriter.DEBUG = DEBUG;
     }
 
@@ -85,10 +94,20 @@ public class Generator extends DapSerializer
     generate(DapDataset dmr, CEConstraint ce, ChunkWriter cw)
         throws DapException
     {
+        generate(dmr, ce, cw, true);
+    }
+
+    public void
+    generate(DapDataset dmr, CEConstraint ce, ChunkWriter cw, boolean withdmr)
+        throws DapException
+    {
         this.dmr = dmr;
         this.cw = cw;
+        if(ce == null)
+            ce = CEConstraint.getUniversal(dmr);
         this.ce = ce;
         this.order = cw.getOrder();
+        this.withdmr = withdmr;
 
         generate();
     }
@@ -100,13 +119,15 @@ public class Generator extends DapSerializer
         try {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
-            DMRPrint dp = new DMRPrint(pw);
-            dp.print(this.dmr, this.ce);
-            pw.close();
-            sw.close();
-            String tmp = sw.toString();
-            this.cw.writeDMR(tmp);
-            this.cw.flush();
+            if(this.withdmr) {
+                DMRPrint dp = new DMRPrint(pw);
+                dp.print(this.dmr, this.ce);
+                pw.close();
+                sw.close();
+                String tmp = sw.toString();
+                this.cw.writeDMR(tmp);
+                this.cw.flush();
+            }
             writer = new SerialWriter(this.cw, this.order);
             generateData(); // generate the serialized data
         } catch (Exception e) {
@@ -126,6 +147,7 @@ public class Generator extends DapSerializer
             generateVar(var);
         }
         writer.endDataset();
+
     }
 
     protected void
@@ -135,9 +157,12 @@ public class Generator extends DapSerializer
         writer.startVariable();
         if(dapvar.getSort() == DapSort.ATOMICVARIABLE) {
             generateAtomicVar(dapvar);
-        } else {//dapvar.getSort() == DapSort.STRUCTURE)
+        } else if(dapvar.getSort() == DapSort.STRUCTURE) {
             generateStructureVar(dapvar);
-        }
+        } else if(dapvar.getSort() == DapSort.SEQUENCE) {
+            generateSequenceVar(dapvar);
+        } else
+            throw new DapException("generate var: not a variable:" + dapvar.getFQN());
         try {
             writer.endVariable();
         } catch (IOException ioe) {
@@ -157,7 +182,7 @@ public class Generator extends DapSerializer
             // get the slices from the constraint
             List<Slice> slices = ce.getVariableSlices(dapvar);
             // Create an odometer from the slices
-            odom = new Odometer(slices,dapvar.getDimensions());
+            odom = new Odometer(slices, dapvar.getDimensions());
         }
         while(odom.hasNext()) {
             Object value = values.nextValue(basetype);
@@ -181,7 +206,7 @@ public class Generator extends DapSerializer
             odom = Odometer.getScalarOdometer();
         } else {// dimensioned
             List<Slice> slices = ce.getVariableSlices(dapvar);
-            odom = new Odometer(slices,struct.getDimensions());
+            odom = new Odometer(slices, struct.getDimensions());
         }
         while(odom.hasNext()) {
             // generate a value for each field recursively
@@ -192,6 +217,38 @@ public class Generator extends DapSerializer
             odom.next();
         }
     }
+
+    void
+    generateSequenceVar(DapVariable dapvar)
+        throws DapException
+    {
+        DapSequence seq = (DapSequence) dapvar;
+        List<DapVariable> fields = seq.getFields();
+        Odometer odom = null;
+        if(dapvar.getRank() == 0) {//scalar
+            odom = Odometer.getScalarOdometer();
+        } else {// dimensioned
+            List<Slice> slices = ce.getVariableSlices(dapvar);
+            odom = new Odometer(slices, seq.getDimensions());
+        }
+        try {
+            while(odom.hasNext()) {
+                // Decide how many rows for this sequence
+                int nrows = this.values.nextCount(MAXROWS);
+                writer.writeObject(DapType.INT64, (long)nrows);
+                for(int i = 0;i < nrows;i++) {
+                    for(int j = 0;j < fields.size();j++) {
+                        DapVariable field = fields.get(j);
+                        generateVar(field);
+                    }
+                }
+                odom.next();
+            }
+        } catch (IOException ioe) {
+            throw new DapException(ioe);
+        }
+    }
+
 
 }
 

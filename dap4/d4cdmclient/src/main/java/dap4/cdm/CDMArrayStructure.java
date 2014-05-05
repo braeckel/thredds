@@ -115,7 +115,7 @@ public class CDMArrayStructure extends ArrayStructure implements CDMArray
     // CDMArry Interface
 
     @Override
-    public D4DSP getDSP()
+    public DSP getDSP()
     {
         return dsp;
     }

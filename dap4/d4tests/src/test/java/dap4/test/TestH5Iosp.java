@@ -59,14 +59,6 @@ public class TestH5Iosp extends DapTestCommon
     //////////////////////////////////////////////////
     // Instance variables
 
-    // System properties
-
-    protected boolean prop_diff = true;
-    protected boolean prop_baseline = false;
-    protected boolean prop_visual = false;
-    protected boolean prop_debug = DEBUG;
-    protected boolean prop_generate = true;
-
     // Misc variables
     protected boolean isbigendian = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
 
@@ -219,24 +211,6 @@ public class TestH5Iosp extends DapTestCommon
         return false;
     }
 
-    /**
-     * Try to get the system properties
-     */
-    void setSystemProperties()
-    {
-        if(System.getProperty("nodiff") != null)
-            prop_diff = false;
-        String value = System.getProperty("baseline");
-        if(value != null) prop_baseline = true;
-        value = System.getProperty("nogenerate");
-        if(value != null) prop_generate = false;
-        value = System.getProperty("debug");
-        if(value != null) prop_debug = true;
-        if(System.getProperty("visual") != null)
-            prop_visual = true;
-        if(prop_baseline && prop_diff)
-            prop_diff = false;
-    }
 
     // Locate the test cases with given prefix
     List<H5IospTest>

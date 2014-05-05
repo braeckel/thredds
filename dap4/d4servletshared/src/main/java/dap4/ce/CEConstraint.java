@@ -197,7 +197,17 @@ public class CEConstraint
             throw new UnsupportedOperationException();
         }
 
-        /* Evaluator */
+        /**
+	 * Evaluate a filter with respect to a Sequence record.
+	 * Assumes the filter has been canonicalized so that
+	 * the lhs is a variable.
+	 *
+	 * @param seq the template
+         * @param record the record to evaluate
+         * @parem expr the filter
+	 * @returns true if the filter evaluates to true for this record
+	 * @throws DapException
+	 */
         protected boolean
         matches(DapSequence seq, DataRecord record, CEAST expr)
                 throws DapException
@@ -212,14 +222,12 @@ public class CEConstraint
                     } else {
                         Object lvalue = null;
                         Object rvalue = null;
-                        if (expr.lhs.sort == CEAST.Sort.CONSTANT)
-                            lvalue = expr.lhs.value;
-                        else if (expr.rhs.sort == CEAST.Sort.CONSTANT)
-                            rvalue = expr.rhs.value;
-                        else if (expr.lhs.sort == CEAST.Sort.SEGMENT)
-                            lvalue = eval(seq, record, expr.lhs.name);
-                        else if (expr.rhs.sort == CEAST.Sort.SEGMENT)
+                        assert (expr.lhs.sort == CEAST.Sort.SEGMENT);
+                        lvalue = eval(seq, record, expr.lhs.name);
+		        if(expr.rhs.sort == CEAST.Sort.SEGMENT)
                             rvalue = eval(seq, record, expr.rhs.name);
+			else
+			    rvalue = expr.rhs.value;
                         int comparison = compare(lvalue, rvalue);
                         switch (expr.op) {
                         case LT:

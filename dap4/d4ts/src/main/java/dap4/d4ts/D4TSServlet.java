@@ -101,6 +101,7 @@ public class D4TSServlet extends DapServlet
      * @param mode        The extension of what is to be read
      */
 
+    /*
     void
     doSynthetic(DapRequest drq, String datasetname, RequestMode mode)
         throws IOException
@@ -158,6 +159,7 @@ public class D4TSServlet extends DapServlet
         }
         cw.close();
     }
+    */
 
 }
 

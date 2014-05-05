@@ -60,12 +60,6 @@ public class TestParserCE extends DapTestCommon
     //////////////////////////////////////////////////
     // Instance methods
 
-    // System properties
-
-    boolean prop_diff = true;
-    boolean prop_baseline = false;
-    boolean prop_visual = false;
-
     // All test cases
     List<TestSet> alltestsets = new ArrayList<TestSet>();
 
@@ -103,18 +97,7 @@ public class TestParserCE extends DapTestCommon
         alltestsets.add(set);
     }
 
-    /**
-     * Try to get the system properties
-     */
-    void setSystemProperties()
-    {
-        if(System.getProperty("nodiff") != null)
-            prop_diff = false;
-        if(System.getProperty("baseline") != null)
-            prop_baseline = true;
-        if(System.getProperty("visual") != null)
-            prop_visual = true;
-    }
+
 
     //////////////////////////////////////////////////
     // Junit test method

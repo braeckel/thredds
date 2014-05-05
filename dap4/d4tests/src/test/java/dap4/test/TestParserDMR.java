@@ -46,13 +46,6 @@ public class TestParserDMR extends DapTestCommon
     //////////////////////////////////////////////////
     // Instance methods
 
-    // System properties
-
-    protected boolean prop_diff = true;
-    protected boolean prop_baseline = false;
-    protected boolean prop_visual = false;
-    protected String prop_controls = null;
-
     // Test cases
     protected List<TestCase> alltestcases = new ArrayList<TestCase>();
     protected List<TestCase> chosentests = new ArrayList<TestCase>();
@@ -135,21 +128,6 @@ public class TestParserDMR extends DapTestCommon
             TestCase ct = new TestCase(dirpath, basename, "dmr");
             this.alltestcases.add(ct);
         }
-    }
-
-
-    /**
-     * Try to get the system properties
-     */
-    void setSystemProperties()
-    {
-        if (System.getProperty("nodiff") != null)
-            prop_diff = false;
-        if (System.getProperty("baseline") != null)
-            prop_baseline = true;
-        if (System.getProperty("visual") != null)
-            prop_visual = true;
-        prop_controls = System.getProperty("X");
     }
 
     void setControls()

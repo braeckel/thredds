@@ -111,7 +111,7 @@ public class CDMCompiler
         //cdmroot = new CDMDataset();
         compileDMR();
         // iterate over the variables represented in the databuffer
-        List<DataVariable> vars = d4root.getTopVariables();
+        List<D4DataVariable> vars = d4root.getTopVariables();
         for(DataVariable var : vars) {
             CDMArray array = compileVar(var);
             Variable cdmvar = (Variable) nodemap.get(var.getTemplate());

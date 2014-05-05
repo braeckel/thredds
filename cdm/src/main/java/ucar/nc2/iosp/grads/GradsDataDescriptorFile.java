@@ -791,7 +791,7 @@ public class GradsDataDescriptorFile {
     private List<String> getFileNames() throws IOException {
         if (fileNames == null) {
             fileNames        = new ArrayList<String>();
-            timeStepsPerFile = tDim.getSize();
+            timeStepsPerFile = (tDim == null ? 0 : tDim.getSize());
             if ( !isTemplate()) {  // single file
                 fileNames.add(getFullPath(getDataFile()));
             } else {               // figure out template type

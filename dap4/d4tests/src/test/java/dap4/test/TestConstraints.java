@@ -78,14 +78,6 @@ public class TestConstraints extends DapTestCommon
     //////////////////////////////////////////////////
     // Instance variables
 
-    // System properties
-
-    boolean prop_diff = true;
-    boolean prop_baseline = false;
-    boolean prop_visual = false;
-    boolean prop_debug = DEBUG;
-    String prop_server = null;
-
     // Test cases
 
     List<ClientTest> alltestcases = new ArrayList<ClientTest>();
@@ -272,21 +264,6 @@ public class TestConstraints extends DapTestCommon
 
     //////////////////////////////////////////////////
     // Utility methods
-
-    /**
-     * Try to get the system properties
-     */
-    void setSystemProperties()
-    {
-        prop_diff = (System.getProperty("nodiff") == null);
-        prop_baseline = (System.getProperty("baseline") != null);
-        prop_visual = (System.getProperty("visual") != null);
-        if(System.getProperty("debug") != null)
-            prop_debug = true;
-        prop_server = System.getProperty("server");
-        if(prop_diff && prop_baseline)
-            prop_diff = false;
-    }
 
     // Locate the test cases with given prefix
     ClientTest

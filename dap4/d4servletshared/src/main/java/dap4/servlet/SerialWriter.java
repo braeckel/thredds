@@ -76,7 +76,7 @@ public class SerialWriter
         this.output = output;
         this.order = order;
         this.longbuffer = ByteBuffer.allocate(8) //8==sizeof(long)
-            .order(order);
+            			.order(order);
         if("CRC32".equalsIgnoreCase(DapUtil.DIGESTER)) {
             // use the one from java.util.zip.CRC32
             checksum = new java.util.zip.CRC32();
@@ -138,17 +138,17 @@ public class SerialWriter
             break;
         case Int32:
         case UInt32:
-            buf.putInt((Integer) value);
+            buf.putInt(((Number) value).intValue());
             break;
         case Int64:
         case UInt64:
-            buf.putLong((Long) value);
+            buf.putLong(((Number) value).longValue());
             break;
         case Float32:
-            buf.putFloat((Float) value);
+            buf.putFloat(((Number) value).floatValue());
             break;
         case Float64:
-            buf.putDouble((Double) value);
+            buf.putDouble(((Number) value).doubleValue());
             break;
 
         case URL:
@@ -378,6 +378,8 @@ public class SerialWriter
         int len = buf.position();
         if(checksumming)
             checksum.update(bytes, 0, len);
+        if(DEBUG)
+            DapDump.dumpbytes(buf);
         output.write(bytes, 0, len);
         if(DEBUG) {
             System.err.printf("%s: ", daptype.getShortName());

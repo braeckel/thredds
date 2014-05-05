@@ -26,13 +26,6 @@ public class TestDSR extends DapTestCommon
     //////////////////////////////////////////////////
     // Instance variables
 
-    // System properties
-
-    protected boolean prop_diff = true;
-    protected boolean prop_baseline = false;
-    protected boolean prop_visual = false;
-    protected boolean prop_debug = DEBUG;
-
     protected String datasetpath = null;
 
     protected String root = null;
@@ -111,23 +104,6 @@ public class TestDSR extends DapTestCommon
 
     //////////////////////////////////////////////////
     // Utility methods
-
-    /**
-     * Try to get the system properties
-     */
-    void setSystemProperties()
-    {
-        if(System.getProperty("nodiff") != null)
-            prop_diff = false;
-        String value = System.getProperty("baseline");
-	if(value != null) prop_baseline = true;
-        value = System.getProperty("debug");
-	if(value != null) prop_debug = true;
-        if(System.getProperty("visual") != null)
-            prop_visual = true;
-        if(prop_baseline && prop_diff)
-            prop_diff = false;
-    }
 
     //////////////////////////////////////////////////
     // Stand alone
