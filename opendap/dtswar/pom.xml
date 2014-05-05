@@ -13,11 +13,11 @@
             Module Description
         =========================================================== -->
    <!-- groupId>edu.ucar</groupId-->
-   <artifactId>dts</artifactId>
+   <artifactId>dtswar</artifactId>
    <packaging>war</packaging>
    <name>DAP Test Server (DTS) webapp</name>
     <description>
-      DAP server to serve up DAP test cases.
+      Tomcap war for DAP server to serve up DAP test cases.
     </description>
     <url>http://www.unidata.ucar.edu/software/netcdf-java/</url>
 
