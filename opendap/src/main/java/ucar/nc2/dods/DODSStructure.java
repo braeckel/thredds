@@ -32,10 +32,9 @@
  */
 package ucar.nc2.dods;
 
+import opendap.dap.*;
 import ucar.ma2.*;
 import ucar.nc2.*;
-import ucar.nc2.dods.DODSNode;
-import opendap.dap.*;
 
 import java.util.*;
 import java.io.IOException;
