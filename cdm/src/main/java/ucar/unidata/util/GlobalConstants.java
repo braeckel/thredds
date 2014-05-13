@@ -53,35 +53,6 @@ abstract public class GlobalConstants
         REMOTETESTSERVER = s;
     }
 
-    static public String NETCDF4LIBRARYPATH =
-        "/opt/netcdf4"
-            + File.pathSeparator
-            + "/home/dmh/opt/netcdf4/lib" //temporary
-            + File.pathSeparator
-            + "/home/mhermida/opt/lib" //temporary
-            // for Windows
-            + File.pathSeparator
-            + "c:/opt/netcdf" //temporary
-        ;
-
-    static public void addNETCDF4LIBRARYPATH(String s)
-    {
-        NETCDF4LIBRARYPATH =
-            s
-                + File.pathSeparator
-                + NETCDF4LIBRARYPATH;
-    }
-
-    static public void setNETCDF4LIBRARYPATH(String s)
-    {
-        NETCDF4LIBRARYPATH = s;
-    }
-
-    static public String NETCDF4LIBRARYNAME = "netcdf";
-
-    static public void setNETCDF4LIBRARYNAME(String s)
-    {
-        NETCDF4LIBRARYNAME = s;
-    }
-
 }
+
+
