@@ -1,0 +1,39 @@
+    {
+        int stop = buf0.limit();
+        int size = stop + 8;
+        ByteBuffer buf = ByteBuffer.allocate(size).order(buf0.order());
+        Arrays.fill(buf.array(), (byte)0);
+        buf.put(buf0);
+        buf.position(0);
+        buf.limit(size);
+        int i = 0;
+        try {
+            for(i = 0;buf.position() < stop;i++) {
+                int savepos = buf.position();
+                int iv = buf.getInt();
+                buf.position(savepos);
+                long lv = buf.getLong();
+                buf.position(savepos);
+                short sv = buf.getShort();
+                buf.position(savepos);
+                byte b = buf.get();
+                long uiv = ((long) iv) & 0xFFFFFFFFL;
+                int usv = ((int) sv) & 0xFFFF;
+                int ib = (int) b;
+                int ub = (iv & 0xFF);
+                char c = (char) ub;
+                String s = Character.toString(c);
+                if(c == '\r') s = "\\r";
+                else if(c == '\n') s = "\\n";
+                else if(c < ' ') s = "?";
+                System.out.printf("[%03d] %02x %4d '%s'", i, ub, ib, s);
+                System.out.printf("\t%12d 0x%08x",iv, uiv);
+                System.out.printf("\t%5d\t0x%04x",sv, usv);
+                System.out.println();
+            }
+
+        } catch (Exception e) {
+            System.out.println("failure:" + e);
+        } finally {
+            System.out.flush();
+        }
