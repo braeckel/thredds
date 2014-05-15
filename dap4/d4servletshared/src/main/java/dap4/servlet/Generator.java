@@ -75,16 +75,18 @@ public class Generator extends DapSerializer
     protected ChunkWriter cw = null;
     protected CEConstraint ce = null;
     protected boolean withdmr = true;
+    protected DapDataset dmr = null;
 
     protected int rowcount = 0;
 
     //////////////////////////////////////////////////
     // Constructor(s)
 
-    public Generator(ValueSource src)
+    public Generator(DapDataset dmr, ValueSource src)
         throws DapException
     {
         super();
+	this.dmr = dmr;
         if(src == null)
             src = ValueSource.RANDOM; // default
         switch (src) {
@@ -116,20 +118,20 @@ public class Generator extends DapSerializer
     // Generator
 
     public void
-    generate(DapDataset dmr, CEConstraint ce, ChunkWriter cw)
+    generate(CEConstraint ce, ChunkWriter cw)
         throws DapException
     {
-        generate(dmr, ce, cw, true);
+        generate(ce, cw, true);
     }
 
     public void
-    generate(DapDataset dmr, CEConstraint ce, ChunkWriter cw, boolean withdmr)
+    generate(CEConstraint ce, ChunkWriter cw, boolean withdmr)
         throws DapException
     {
         begin(ce, cw, withdmr);
         if(this.withdmr)
-            generateDMR(dmr);
-        dataset(dmr);
+            generateDMR(this.dmr);
+        dataset(this.dmr);
         end();
     }
 
@@ -137,15 +139,13 @@ public class Generator extends DapSerializer
     begin(CEConstraint ce, ChunkWriter cw, boolean withdmr)
         throws DapException
     {
-        this.dmr = dmr;
         this.cw = cw;
         if(ce == null)
-            ce = CEConstraint.getUniversal(dmr);
+            ce = CEConstraint.getUniversal(this.dmr);
         this.ce = ce;
         this.order = cw.getOrder();
         this.withdmr = withdmr;
         writer = new SerialWriter(this.cw, this.order);
-        this.dmr = dmr;
     }
 
     public void
@@ -180,14 +180,12 @@ public class Generator extends DapSerializer
     dataset(DapDataset dmr)
         throws DapException
     {
-        writer.startDataset();
         // Iterate over the variables in order
         for(DapVariable var : this.dmr.getTopVariables()) {
             if(!this.ce.references(var))
                 continue;
             variable(var);
         }
-        writer.endDataset();
     }
 
     public void

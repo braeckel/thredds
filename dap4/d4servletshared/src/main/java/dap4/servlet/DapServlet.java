@@ -329,21 +329,21 @@ public class DapServlet extends javax.servlet.http.HttpServlet
         pw.close();
         sw.close();
 
-        String dmr = sw.toString();
+        String sdmr = sw.toString();
         if(DEBUG)
-            System.err.println("Sending: Data DMR:\n" + dmr);
+            System.err.println("Sending: Data DMR:\n" + sdmr);
 
         // Wrap the outputstream with a Chunk writer
         OutputStream out = drq.getOutputStream();
         ChunkWriter cw = new ChunkWriter(out, RequestMode.DAP, this.byteorder);
-        cw.writeDMR(dmr);
+        cw.writeDMR(sdmr);
         cw.flush();
 
         addCommonHeaders(drq);
 
         // Dump the databuffer part
         DapSerializer writer = new DapSerializer(dsp, ce, cw, byteorder);
-        writer.write();
+        writer.write(dsp.getDMR());
         cw.flush();
         cw.close();
     }

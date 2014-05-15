@@ -46,20 +46,11 @@ public class SerialWriter
     static final int COUNTSIZE = 8;
 
     //////////////////////////////////////////////////
-    // Type declarations
-
-    static enum State
-    {
-        INITIAL, DATASET, VARIABLE;
-    }
-
-    //////////////////////////////////////////////////
     // Instance variables
 
     ByteOrder order = null;
     OutputStream output = null;
     int depth = 0;
-    State state = State.INITIAL;
 
     java.util.zip.Checksum checksum;
     boolean checksumming = true;
@@ -313,20 +304,6 @@ public class SerialWriter
     // Dataset oriented writes
 
     public void
-    startDataset()
-    {
-        assert (state == State.INITIAL) : "Internal Error";
-        state = State.DATASET;
-    }
-
-    public void
-    endDataset()
-    {
-        assert (state == State.DATASET && depth == 0) : "Internal Error";
-        state = State.INITIAL;
-    }
-
-    public void
     startGroup()
     {
     }
@@ -342,9 +319,6 @@ public class SerialWriter
     public void
     startVariable()
     {
-        assert ((state == State.DATASET && depth == 0)
-            || (state == State.VARIABLE && depth > 0)) : "Internal Error";
-        state = State.VARIABLE;
         if(depth == 0)
             checksum.reset();
         depth++;
@@ -354,7 +328,6 @@ public class SerialWriter
     endVariable()
         throws IOException
     {
-        assert (state == State.VARIABLE) : "Internal Error";
         depth--;
         if(depth == 0 && checksumming) {
             long digest = checksum.getValue(); // get the digest value
@@ -372,7 +345,6 @@ public class SerialWriter
             }
             // Write out the digest in binary form
             output.write(csum, 0, DapUtil.CHECKSUMSIZE);
-            state = State.DATASET;
         }
     }
 

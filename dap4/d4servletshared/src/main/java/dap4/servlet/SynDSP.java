@@ -82,8 +82,8 @@ public class SynDSP extends D4DSP
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ChunkWriter cw = new ChunkWriter(bos, RequestMode.DAP, ByteOrder.nativeOrder());
-            Generator generator = new Generator(Value.ValueSource.RANDOM);
-            generator.generate(dmr, null, cw);
+            Generator generator = new Generator(dmr,Value.ValueSource.RANDOM);
+            generator.generate(null, cw);
             cw.close();
             bos.close();
             byte[] raw = bos.toByteArray();
