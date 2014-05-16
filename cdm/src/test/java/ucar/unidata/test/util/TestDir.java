@@ -141,7 +141,7 @@ public class TestDir {
 
     String rts = System.getProperty(remoteTestServerPropName);
     if(rts != null && rts.length() > 0)
-	    remoteTestServer = rts;
+	remoteTestServer = rts;
   }
 
   static public void showMem(String where) {
