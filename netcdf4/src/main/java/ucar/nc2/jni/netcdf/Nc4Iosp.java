@@ -64,7 +64,6 @@ import java.nio.IntBuffer;
 
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.NativeLongByReference;
-import ucar.unidata.util.GlobalConstants;
 
 import static ucar.nc2.jni.netcdf.Nc4prototypes.*;
 
