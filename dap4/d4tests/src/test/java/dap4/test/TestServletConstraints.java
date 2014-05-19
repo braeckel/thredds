@@ -154,7 +154,7 @@ public class TestServletConstraints extends DapTestCommon
     void
     chooseTestcases()
     {
-        if(true) {
+        if(false) {
             chosentests = locate("test_anon_dim.syn?/vu32[0:3]");
         } else {
             for(ConstraintTest tc : alltestcases)

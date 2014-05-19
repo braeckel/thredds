@@ -148,10 +148,7 @@ public class FrontPage
                 URLMap.Result result = urlmap.mapPath(absname);
                 String urlpath = this.svcinfo.getServer() + result.prefix + result.suffix; // append remainder not used by mappath
                 String line = String.format(HTML_FORMAT, name,
-                    urlpath, name,
-                    urlpath, name,
-                    urlpath, name,
-                    urlpath, name);
+                    urlpath, urlpath, urlpath, urlpath);
                 html.append(line);
             }
             html.append(TABLE_FOOTER);

@@ -3,6 +3,7 @@ package dap4.test;
 import dap4.dap4shared.ChunkInputStream;
 import dap4.core.util.*;
 import dap4.dap4shared.RequestMode;
+import dap4.servlet.Generator;
 import dap4.test.servlet.*;
 import dap4.test.util.DapTestCommon;
 import dap4.test.util.Dump;
@@ -35,6 +36,8 @@ public class TestFilters extends DapTestCommon
 
     static final BigInteger MASK = new BigInteger("FFFFFFFFFFFFFFFF", 16);
 
+    static protected final int DEFAULTROWCOUNT = 5;
+
     //////////////////////////////////////////////////
     // Type Declarations
 
@@ -58,19 +61,26 @@ public class TestFilters extends DapTestCommon
         String testinputpath;
         String baselinepath;
         int id;
+        int rowcount = DEFAULTROWCOUNT;
 
         ConstraintTest(int id, String dataset, String extensions, String ce)
         {
-            this(id, dataset, extensions, ce, null, true);
+            this(id, dataset, extensions, 0, ce, null, true);
         }
 
         ConstraintTest(int id, String dataset, String extensions, String ce,
                        Dump.Commands template)
         {
-            this(id, dataset, extensions, ce, template, false);
+            this(id, dataset, extensions, 0, ce, template, false);
         }
 
-        ConstraintTest(int id, String dataset, String extensions, String ce,
+        ConstraintTest(int id, String dataset, String extensions, int rows, String ce,
+                       Dump.Commands template)
+        {
+            this(id, dataset, extensions, rows, ce, template, false);
+        }
+
+        ConstraintTest(int id, String dataset, String extensions, int rows, String ce,
                        Dump.Commands template, boolean xfail)
         {
             if(alltests[id] != null)
@@ -86,6 +96,7 @@ public class TestFilters extends DapTestCommon
                 = root + "/" + TESTINPUTDIR + "/" + dataset;
             this.baselinepath
                 = root + "/" + BASELINEDIR + "/" + dataset + "." + String.valueOf(this.id);
+            this.rowcount = rows == 0 ? DEFAULTROWCOUNT : rows;
             alltests[id] = this;
         }
 
@@ -124,6 +135,7 @@ public class TestFilters extends DapTestCommon
     String datasetpath = null;
 
     String root = null;
+
     //////////////////////////////////////////////////
     // Constructor(s)
 
@@ -155,22 +167,23 @@ public class TestFilters extends DapTestCommon
     //////////////////////////////////////////////////
     // Define test cases
 
-    void
+    protected void
     chooseTestcases()
     {
-        if(false) {
-            chosentests = locate("test_atomic_array.nc?/vu8[1][0:2:2];/vd[1];/vs[1][0];/vo[0][1]");
+        if(true) {
+            chosentests = locate("test_sequence_1.syn?s|i1<0");
         } else {
             for(ConstraintTest tc : alltestcases)
                 chosentests.add(tc);
         }
     }
 
-    void defineAllTestcases(String root)
+    protected void
+    defineAllTestcases(String root)
     {
         ConstraintTest.root = root;
         this.alltestcases.add(
-            new ConstraintTest(1, "test_sequence_1.syn", "dmr,dap", "",
+            new ConstraintTest(1, "test_sequence_1.syn", "dmr,dap", "s|i1<0",
                 new Dump.Commands()
                 {
                     public void run(Dump printer) throws IOException
@@ -208,6 +221,7 @@ public class TestFilters extends DapTestCommon
     {
         boolean pass = true;
         System.out.println("Testcase: " + testcase.toString());
+        Generator.setRowCount(testcase.rowcount);
 
         for(String extension : testcase.extensions) {
             RequestMode ext = RequestMode.modeFor(extension);

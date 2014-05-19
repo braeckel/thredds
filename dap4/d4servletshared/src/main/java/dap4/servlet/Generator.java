@@ -57,6 +57,8 @@ public class Generator extends DapSerializer
 
     static final int MAXROWS = 5;
 
+    static int rowcount = 0;
+
     //////////////////////////////////////////////////
     // static methods
     protected static boolean asciionly = true;
@@ -64,6 +66,17 @@ public class Generator extends DapSerializer
     static public void setASCII(boolean tf)
     {
         asciionly = tf;
+    }
+
+    static public int getRowCount()
+    {
+        return rowcount;
+    }
+
+    static public void setRowCount(int count)
+    {
+        if(count >= 0)
+            rowcount = count;
     }
 
     //////////////////////////////////////////////////
@@ -77,8 +90,6 @@ public class Generator extends DapSerializer
     protected boolean withdmr = true;
     protected DapDataset dmr = null;
 
-    protected int rowcount = 0;
-
     //////////////////////////////////////////////////
     // Constructor(s)
 
@@ -86,7 +97,7 @@ public class Generator extends DapSerializer
         throws DapException
     {
         super();
-	this.dmr = dmr;
+        this.dmr = dmr;
         if(src == null)
             src = ValueSource.RANDOM; // default
         switch (src) {
@@ -98,20 +109,6 @@ public class Generator extends DapSerializer
         }
         values.setASCII(asciionly);
         SerialWriter.DEBUG = DEBUG;
-    }
-
-    //////////////////////////////////////////////////
-    // Accessors
-
-    public int getRowCount()
-    {
-        return this.rowcount;
-    }
-
-    public void setRowCount(int count)
-    {
-        if(count >= 0)
-            this.rowcount = count;
     }
 
     //////////////////////////////////////////////////
@@ -192,6 +189,7 @@ public class Generator extends DapSerializer
     variable(DapVariable dapvar)
         throws DapException
     {
+        writer.startVariable();
         if(dapvar.getSort() == DapSort.ATOMICVARIABLE) {
             atomicVariable((DapAtomicVariable) dapvar);
         } else if(dapvar.getSort() == DapSort.STRUCTURE) {

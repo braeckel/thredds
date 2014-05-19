@@ -42,6 +42,7 @@ public class Synthesize
     public byte[] tmp = new byte[MAXSIZE];
     public ByteBuffer bbtmp = ByteBuffer.wrap(tmp);
     public ByteArrayOutputStream writer = new ByteArrayOutputStream();
+
     //////////////////////////////////////////////////
     // Constructor(s)
 
@@ -51,12 +52,6 @@ public class Synthesize
 
     //////////////////////////////////////////////////
     // Accessors
-
-    public int
-    position()
-    {
-        return writer.size();
-    }
 
     public byte[]
     getBytes()
