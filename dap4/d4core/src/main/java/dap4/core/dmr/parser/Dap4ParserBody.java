@@ -1,4 +1,4 @@
-/* A Bison parser, made by GNU Bison 3.0.  */
+/* A Bison parser, made by GNU Bison 3.0.2.  */
 
 /* Skeleton implementation for Bison LALR(1) parsers in Java
 
@@ -37,21 +37,21 @@ package dap4.core.dmr.parser;
 
 /* "Dap4ParserBody.java":39  */ /* lalr1.java:92  */
 /* "%code imports" blocks.  */
-/* "../../../../../../../../grammars/dap4.y":13  */ /* lalr1.java:93  */
+/* "dap4.y":13  */ /* lalr1.java:93  */
 
 import dap4.core.util.DapException;
 
 /* "Dap4ParserBody.java":45  */ /* lalr1.java:93  */
 
 /**
- * A Bison parser, automatically generated from <tt>../../../../../../../../grammars/dap4.y</tt>.
+ * A Bison parser, automatically generated from <tt>dap4.y</tt>.
  *
  * @author LALR (1) parser skeleton written by Paolo Bonzini.
  */
 abstract class Dap4ParserBody extends Dap4Actions
 {
     /** Version number for the Bison executable that generated this parser.  */
-  public static final String bisonVersion = "3.0";
+  public static final String bisonVersion = "3.0.2";
 
   /** Name of the skeleton that generated this parser.  */
   public static final String bisonSkeleton = "lalr1.java";
@@ -284,13 +284,18 @@ abstract class Dap4ParserBody extends Dap4Actions
 
   private class YYLexer implements Lexer {
 /* "%code lexer" blocks.  */
-/* "../../../../../../../../grammars/dap4.y":17  */ /* lalr1.java:236  */
+/* "dap4.y":17  */ /* lalr1.java:236  */
 
 public Object getLVal() {return null;}
 public int yylex() {return 0;}
-public void yyerror(String s) {System.err.println(s); System.err.println("near "+getLocation().toString());}
+public void yyerror(String s)
+{
+System.err.println(s);
+System.errr.println("near %s\n",this.locator());
+}
 
-/* "Dap4ParserBody.java":294  */ /* lalr1.java:236  */
+
+/* "Dap4ParserBody.java":299  */ /* lalr1.java:236  */
 
   }
 
@@ -500,6 +505,19 @@ public void yyerror(String s) {System.err.println(s); System.err.println("near "
     return yyerrstatus_ == 0;
   }
 
+  /** Compute post-reduction state.
+   * @param yystate   the current state
+   * @param yysym     the nonterminal to push on the stack
+   */
+  private int yy_lr_goto_state_ (int yystate, int yysym)
+  {
+    int yyr = yypgoto_[yysym - yyntokens_] + yystate;
+    if (0 <= yyr && yyr <= yylast_ && yycheck_[yyr] == yystate)
+      return yytable_[yyr];
+    else
+      return yydefgoto_[yysym - yyntokens_];
+  }
+
   private int yyaction (int yyn, YYStack yystack, int yylen) throws DapException
   {
     Object yyval;
@@ -522,538 +540,538 @@ public void yyerror(String s) {System.err.println(s); System.err.println("near "
       {
           case 4:
   if (yyn == 4)
-    /* "../../../../../../../../grammars/dap4.y":92  */ /* lalr1.java:476  */
+    /* "dap4.y":97  */ /* lalr1.java:489  */
     {enterdataset(((XMLAttributeMap)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 5:
   if (yyn == 5)
-    /* "../../../../../../../../grammars/dap4.y":95  */ /* lalr1.java:476  */
+    /* "dap4.y":100  */ /* lalr1.java:489  */
     {leavedataset();};
   break;
     
 
   case 6:
   if (yyn == 6)
-    /* "../../../../../../../../grammars/dap4.y":101  */ /* lalr1.java:476  */
+    /* "dap4.y":106  */ /* lalr1.java:489  */
     {entergroup(((SaxEvent)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 7:
   if (yyn == 7)
-    /* "../../../../../../../../grammars/dap4.y":104  */ /* lalr1.java:476  */
+    /* "dap4.y":109  */ /* lalr1.java:489  */
     {leavegroup();};
   break;
     
 
   case 14:
   if (yyn == 14)
-    /* "../../../../../../../../grammars/dap4.y":125  */ /* lalr1.java:476  */
+    /* "dap4.y":130  */ /* lalr1.java:489  */
     {enterenumdef(((XMLAttributeMap)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 15:
   if (yyn == 15)
-    /* "../../../../../../../../grammars/dap4.y":128  */ /* lalr1.java:476  */
+    /* "dap4.y":133  */ /* lalr1.java:489  */
     {leaveenumdef();};
   break;
     
 
   case 18:
   if (yyn == 18)
-    /* "../../../../../../../../grammars/dap4.y":138  */ /* lalr1.java:476  */
+    /* "dap4.y":143  */ /* lalr1.java:489  */
     {enumconst(((SaxEvent)(yystack.valueAt (4-(2)))),((SaxEvent)(yystack.valueAt (4-(3)))));};
   break;
     
 
   case 19:
   if (yyn == 19)
-    /* "../../../../../../../../grammars/dap4.y":140  */ /* lalr1.java:476  */
+    /* "dap4.y":145  */ /* lalr1.java:489  */
     {enumconst(((SaxEvent)(yystack.valueAt (4-(3)))),((SaxEvent)(yystack.valueAt (4-(2)))));};
   break;
     
 
   case 20:
   if (yyn == 20)
-    /* "../../../../../../../../grammars/dap4.y":146  */ /* lalr1.java:476  */
+    /* "dap4.y":151  */ /* lalr1.java:489  */
     {enterdimdef(((XMLAttributeMap)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 21:
   if (yyn == 21)
-    /* "../../../../../../../../grammars/dap4.y":149  */ /* lalr1.java:476  */
+    /* "dap4.y":154  */ /* lalr1.java:489  */
     {leavedimdef();};
   break;
     
 
   case 22:
   if (yyn == 22)
-    /* "../../../../../../../../grammars/dap4.y":154  */ /* lalr1.java:476  */
+    /* "dap4.y":159  */ /* lalr1.java:489  */
     {dimref(((SaxEvent)(yystack.valueAt (3-(2)))));};
   break;
     
 
   case 23:
   if (yyn == 23)
-    /* "../../../../../../../../grammars/dap4.y":156  */ /* lalr1.java:476  */
+    /* "dap4.y":161  */ /* lalr1.java:489  */
     {dimref(((SaxEvent)(yystack.valueAt (3-(2)))));};
   break;
     
 
   case 28:
   if (yyn == 28)
-    /* "../../../../../../../../grammars/dap4.y":170  */ /* lalr1.java:476  */
+    /* "dap4.y":175  */ /* lalr1.java:489  */
     {enteratomicvariable(((SaxEvent)(yystack.valueAt (2-(1)))),((SaxEvent)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 29:
   if (yyn == 29)
-    /* "../../../../../../../../grammars/dap4.y":173  */ /* lalr1.java:476  */
+    /* "dap4.y":178  */ /* lalr1.java:489  */
     {leaveatomicvariable(((SaxEvent)(yystack.valueAt (5-(5)))));};
   break;
     
 
   case 30:
   if (yyn == 30)
-    /* "../../../../../../../../grammars/dap4.y":180  */ /* lalr1.java:476  */
+    /* "dap4.y":185  */ /* lalr1.java:489  */
     {enterenumvariable(((XMLAttributeMap)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 31:
   if (yyn == 31)
-    /* "../../../../../../../../grammars/dap4.y":183  */ /* lalr1.java:476  */
+    /* "dap4.y":188  */ /* lalr1.java:489  */
     {leaveenumvariable(((SaxEvent)(yystack.valueAt (5-(5)))));};
   break;
     
 
   case 32:
   if (yyn == 32)
-    /* "../../../../../../../../grammars/dap4.y":189  */ /* lalr1.java:476  */
+    /* "dap4.y":194  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 33:
   if (yyn == 33)
-    /* "../../../../../../../../grammars/dap4.y":190  */ /* lalr1.java:476  */
+    /* "dap4.y":195  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 34:
   if (yyn == 34)
-    /* "../../../../../../../../grammars/dap4.y":191  */ /* lalr1.java:476  */
+    /* "dap4.y":196  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 35:
   if (yyn == 35)
-    /* "../../../../../../../../grammars/dap4.y":192  */ /* lalr1.java:476  */
+    /* "dap4.y":197  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 36:
   if (yyn == 36)
-    /* "../../../../../../../../grammars/dap4.y":193  */ /* lalr1.java:476  */
+    /* "dap4.y":198  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 37:
   if (yyn == 37)
-    /* "../../../../../../../../grammars/dap4.y":194  */ /* lalr1.java:476  */
+    /* "dap4.y":199  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 38:
   if (yyn == 38)
-    /* "../../../../../../../../grammars/dap4.y":195  */ /* lalr1.java:476  */
+    /* "dap4.y":200  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 39:
   if (yyn == 39)
-    /* "../../../../../../../../grammars/dap4.y":196  */ /* lalr1.java:476  */
+    /* "dap4.y":201  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 40:
   if (yyn == 40)
-    /* "../../../../../../../../grammars/dap4.y":197  */ /* lalr1.java:476  */
+    /* "dap4.y":202  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 41:
   if (yyn == 41)
-    /* "../../../../../../../../grammars/dap4.y":198  */ /* lalr1.java:476  */
+    /* "dap4.y":203  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 42:
   if (yyn == 42)
-    /* "../../../../../../../../grammars/dap4.y":199  */ /* lalr1.java:476  */
+    /* "dap4.y":204  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 43:
   if (yyn == 43)
-    /* "../../../../../../../../grammars/dap4.y":200  */ /* lalr1.java:476  */
+    /* "dap4.y":205  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 44:
   if (yyn == 44)
-    /* "../../../../../../../../grammars/dap4.y":201  */ /* lalr1.java:476  */
+    /* "dap4.y":206  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 45:
   if (yyn == 45)
-    /* "../../../../../../../../grammars/dap4.y":202  */ /* lalr1.java:476  */
+    /* "dap4.y":207  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 46:
   if (yyn == 46)
-    /* "../../../../../../../../grammars/dap4.y":203  */ /* lalr1.java:476  */
+    /* "dap4.y":208  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 47:
   if (yyn == 47)
-    /* "../../../../../../../../grammars/dap4.y":207  */ /* lalr1.java:476  */
+    /* "dap4.y":212  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 48:
   if (yyn == 48)
-    /* "../../../../../../../../grammars/dap4.y":208  */ /* lalr1.java:476  */
+    /* "dap4.y":213  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 49:
   if (yyn == 49)
-    /* "../../../../../../../../grammars/dap4.y":209  */ /* lalr1.java:476  */
+    /* "dap4.y":214  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 50:
   if (yyn == 50)
-    /* "../../../../../../../../grammars/dap4.y":210  */ /* lalr1.java:476  */
+    /* "dap4.y":215  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 51:
   if (yyn == 51)
-    /* "../../../../../../../../grammars/dap4.y":211  */ /* lalr1.java:476  */
+    /* "dap4.y":216  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 52:
   if (yyn == 52)
-    /* "../../../../../../../../grammars/dap4.y":212  */ /* lalr1.java:476  */
+    /* "dap4.y":217  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 53:
   if (yyn == 53)
-    /* "../../../../../../../../grammars/dap4.y":213  */ /* lalr1.java:476  */
+    /* "dap4.y":218  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 54:
   if (yyn == 54)
-    /* "../../../../../../../../grammars/dap4.y":214  */ /* lalr1.java:476  */
+    /* "dap4.y":219  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 55:
   if (yyn == 55)
-    /* "../../../../../../../../grammars/dap4.y":215  */ /* lalr1.java:476  */
+    /* "dap4.y":220  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 56:
   if (yyn == 56)
-    /* "../../../../../../../../grammars/dap4.y":216  */ /* lalr1.java:476  */
+    /* "dap4.y":221  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 57:
   if (yyn == 57)
-    /* "../../../../../../../../grammars/dap4.y":217  */ /* lalr1.java:476  */
+    /* "dap4.y":222  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 58:
   if (yyn == 58)
-    /* "../../../../../../../../grammars/dap4.y":218  */ /* lalr1.java:476  */
+    /* "dap4.y":223  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 59:
   if (yyn == 59)
-    /* "../../../../../../../../grammars/dap4.y":219  */ /* lalr1.java:476  */
+    /* "dap4.y":224  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 60:
   if (yyn == 60)
-    /* "../../../../../../../../grammars/dap4.y":220  */ /* lalr1.java:476  */
+    /* "dap4.y":225  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 61:
   if (yyn == 61)
-    /* "../../../../../../../../grammars/dap4.y":221  */ /* lalr1.java:476  */
+    /* "dap4.y":226  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 62:
   if (yyn == 62)
-    /* "../../../../../../../../grammars/dap4.y":222  */ /* lalr1.java:476  */
+    /* "dap4.y":227  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 67:
   if (yyn == 67)
-    /* "../../../../../../../../grammars/dap4.y":235  */ /* lalr1.java:476  */
+    /* "dap4.y":240  */ /* lalr1.java:489  */
     {entermap(((SaxEvent)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 68:
   if (yyn == 68)
-    /* "../../../../../../../../grammars/dap4.y":238  */ /* lalr1.java:476  */
+    /* "dap4.y":243  */ /* lalr1.java:489  */
     {leavemap();};
   break;
     
 
   case 69:
   if (yyn == 69)
-    /* "../../../../../../../../grammars/dap4.y":244  */ /* lalr1.java:476  */
+    /* "dap4.y":249  */ /* lalr1.java:489  */
     {enterstructurevariable(((SaxEvent)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 70:
   if (yyn == 70)
-    /* "../../../../../../../../grammars/dap4.y":247  */ /* lalr1.java:476  */
+    /* "dap4.y":252  */ /* lalr1.java:489  */
     {leavestructurevariable(((SaxEvent)(yystack.valueAt (5-(5)))));};
   break;
     
 
   case 76:
   if (yyn == 76)
-    /* "../../../../../../../../grammars/dap4.y":261  */ /* lalr1.java:476  */
+    /* "dap4.y":266  */ /* lalr1.java:489  */
     {entersequencevariable(((SaxEvent)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 77:
   if (yyn == 77)
-    /* "../../../../../../../../grammars/dap4.y":264  */ /* lalr1.java:476  */
+    /* "dap4.y":269  */ /* lalr1.java:489  */
     {leavesequencevariable(((SaxEvent)(yystack.valueAt (5-(5)))));};
   break;
     
 
   case 89:
   if (yyn == 89)
-    /* "../../../../../../../../grammars/dap4.y":296  */ /* lalr1.java:476  */
+    /* "dap4.y":301  */ /* lalr1.java:489  */
     {enteratomicattribute(((XMLAttributeMap)(yystack.valueAt (3-(2)))),((NamespaceList)(yystack.valueAt (3-(3)))));};
   break;
     
 
   case 90:
   if (yyn == 90)
-    /* "../../../../../../../../grammars/dap4.y":299  */ /* lalr1.java:476  */
+    /* "dap4.y":304  */ /* lalr1.java:489  */
     {leaveatomicattribute();};
   break;
     
 
   case 91:
   if (yyn == 91)
-    /* "../../../../../../../../grammars/dap4.y":304  */ /* lalr1.java:476  */
+    /* "dap4.y":309  */ /* lalr1.java:489  */
     {enteratomicattribute(((XMLAttributeMap)(yystack.valueAt (3-(2)))),((NamespaceList)(yystack.valueAt (3-(3)))));};
   break;
     
 
   case 92:
   if (yyn == 92)
-    /* "../../../../../../../../grammars/dap4.y":306  */ /* lalr1.java:476  */
+    /* "dap4.y":311  */ /* lalr1.java:489  */
     {leaveatomicattribute();};
   break;
     
 
   case 93:
   if (yyn == 93)
-    /* "../../../../../../../../grammars/dap4.y":311  */ /* lalr1.java:476  */
+    /* "dap4.y":316  */ /* lalr1.java:489  */
     {yyval=namespace_list();};
   break;
     
 
   case 94:
   if (yyn == 94)
-    /* "../../../../../../../../grammars/dap4.y":313  */ /* lalr1.java:476  */
+    /* "dap4.y":318  */ /* lalr1.java:489  */
     {yyval=namespace_list(((NamespaceList)(yystack.valueAt (2-(1)))),((SaxEvent)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 95:
   if (yyn == 95)
-    /* "../../../../../../../../grammars/dap4.y":320  */ /* lalr1.java:476  */
+    /* "dap4.y":325  */ /* lalr1.java:489  */
     {yyval=(((SaxEvent)(yystack.valueAt (3-(2)))));};
   break;
     
 
   case 96:
   if (yyn == 96)
-    /* "../../../../../../../../grammars/dap4.y":327  */ /* lalr1.java:476  */
+    /* "dap4.y":332  */ /* lalr1.java:489  */
     {entercontainerattribute(((XMLAttributeMap)(yystack.valueAt (3-(2)))),((NamespaceList)(yystack.valueAt (3-(3)))));};
   break;
     
 
   case 97:
   if (yyn == 97)
-    /* "../../../../../../../../grammars/dap4.y":330  */ /* lalr1.java:476  */
+    /* "dap4.y":335  */ /* lalr1.java:489  */
     {leavecontainerattribute();};
   break;
     
 
   case 102:
   if (yyn == 102)
-    /* "../../../../../../../../grammars/dap4.y":347  */ /* lalr1.java:476  */
+    /* "dap4.y":352  */ /* lalr1.java:489  */
     {value(((SaxEvent)(yystack.valueAt (3-(2)))));};
   break;
     
 
   case 103:
   if (yyn == 103)
-    /* "../../../../../../../../grammars/dap4.y":349  */ /* lalr1.java:476  */
+    /* "dap4.y":354  */ /* lalr1.java:489  */
     {value(((SaxEvent)(yystack.valueAt (3-(2)))));};
   break;
     
 
   case 104:
   if (yyn == 104)
-    /* "../../../../../../../../grammars/dap4.y":355  */ /* lalr1.java:476  */
+    /* "dap4.y":360  */ /* lalr1.java:489  */
     {enterotherxml(((XMLAttributeMap)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 105:
   if (yyn == 105)
-    /* "../../../../../../../../grammars/dap4.y":358  */ /* lalr1.java:476  */
+    /* "dap4.y":363  */ /* lalr1.java:489  */
     {leaveotherxml();};
   break;
     
 
   case 108:
   if (yyn == 108)
-    /* "../../../../../../../../grammars/dap4.y":369  */ /* lalr1.java:476  */
+    /* "dap4.y":374  */ /* lalr1.java:489  */
     {enterxmlelement(((SaxEvent)(yystack.valueAt (2-(1)))),((XMLAttributeMap)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 109:
   if (yyn == 109)
-    /* "../../../../../../../../grammars/dap4.y":372  */ /* lalr1.java:476  */
+    /* "dap4.y":377  */ /* lalr1.java:489  */
     {leavexmlelement(((SaxEvent)(yystack.valueAt (5-(5)))));};
   break;
     
 
   case 110:
   if (yyn == 110)
-    /* "../../../../../../../../grammars/dap4.y":374  */ /* lalr1.java:476  */
+    /* "dap4.y":379  */ /* lalr1.java:489  */
     {xmltext(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 111:
   if (yyn == 111)
-    /* "../../../../../../../../grammars/dap4.y":382  */ /* lalr1.java:476  */
+    /* "dap4.y":387  */ /* lalr1.java:489  */
     {yyval=xml_attribute_map();};
   break;
     
 
   case 112:
   if (yyn == 112)
-    /* "../../../../../../../../grammars/dap4.y":384  */ /* lalr1.java:476  */
+    /* "dap4.y":389  */ /* lalr1.java:489  */
     {yyval=xml_attribute_map(((XMLAttributeMap)(yystack.valueAt (2-(1)))),((SaxEvent)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 186:
   if (yyn == 186)
-    /* "../../../../../../../../grammars/dap4.y":477  */ /* lalr1.java:476  */
+    /* "dap4.y":482  */ /* lalr1.java:489  */
     {entererror(((XMLAttributeMap)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 187:
   if (yyn == 187)
-    /* "../../../../../../../../grammars/dap4.y":481  */ /* lalr1.java:476  */
+    /* "dap4.y":486  */ /* lalr1.java:489  */
     {leaveerror();};
   break;
     
 
   case 190:
   if (yyn == 190)
-    /* "../../../../../../../../grammars/dap4.y":491  */ /* lalr1.java:476  */
+    /* "dap4.y":496  */ /* lalr1.java:489  */
     {errormessage(((SaxEvent)(yystack.valueAt (3-(2)))));};
   break;
     
 
   case 191:
   if (yyn == 191)
-    /* "../../../../../../../../grammars/dap4.y":493  */ /* lalr1.java:476  */
+    /* "dap4.y":498  */ /* lalr1.java:489  */
     {errorcontext(((SaxEvent)(yystack.valueAt (3-(2)))));};
   break;
     
 
   case 192:
   if (yyn == 192)
-    /* "../../../../../../../../grammars/dap4.y":495  */ /* lalr1.java:476  */
+    /* "dap4.y":500  */ /* lalr1.java:489  */
     {errorotherinfo(((SaxEvent)(yystack.valueAt (3-(2)))));};
   break;
     
 
 
-/* "Dap4ParserBody.java":1057  */ /* lalr1.java:476  */
+/* "Dap4ParserBody.java":1075  */ /* lalr1.java:489  */
         default: break;
       }
 
@@ -1063,14 +1081,7 @@ public void yyerror(String s) {System.err.println(s); System.err.println("near "
     yylen = 0;
 
     /* Shift the result of the reduction.  */
-    yyn = yyr1_[yyn];
-    int yystate = yypgoto_[yyn - yyntokens_] + yystack.stateAt (0);
-    if (0 <= yystate && yystate <= yylast_
-        && yycheck_[yystate] == yystack.stateAt (0))
-      yystate = yytable_[yystate];
-    else
-      yystate = yydefgoto_[yyn - yyntokens_];
-
+    int yystate = yy_lr_goto_state_ (yystack.stateAt (0), yyr1_[yyn]);
     yystack.push (yystate, yyval);
     return YYNEWSTATE;
   }
@@ -1855,26 +1866,26 @@ private static final short yycheck_[] = yycheck_init();
   {
     return new short[]
     {
-       0,    85,    85,    86,    92,    90,   101,    99,   113,   115,
-     116,   117,   118,   119,   125,   123,   132,   133,   137,   139,
-     146,   144,   153,   155,   160,   161,   162,   163,   170,   168,
-     180,   178,   189,   190,   191,   192,   193,   194,   195,   196,
-     197,   198,   199,   200,   201,   202,   203,   207,   208,   209,
-     210,   211,   212,   213,   214,   215,   216,   217,   218,   219,
-     220,   221,   222,   225,   227,   228,   229,   235,   233,   244,
-     242,   250,   252,   253,   254,   255,   261,   259,   267,   269,
-     270,   271,   272,   275,   277,   281,   285,   286,   287,   296,
-     293,   304,   301,   311,   312,   317,   327,   324,   335,   336,
-     341,   342,   346,   348,   355,   353,   362,   363,   369,   367,
-     373,   382,   383,   390,   391,   392,   393,   394,   395,   396,
-     397,   398,   399,   400,   401,   402,   408,   409,   410,   411,
-     412,   413,   414,   415,   416,   417,   418,   419,   420,   421,
-     422,   423,   424,   425,   426,   427,   428,   429,   430,   431,
-     432,   433,   434,   435,   436,   437,   441,   442,   443,   444,
-     445,   446,   447,   448,   449,   450,   451,   452,   453,   454,
-     455,   456,   457,   458,   459,   460,   461,   462,   463,   464,
-     465,   466,   467,   468,   469,   470,   477,   474,   484,   486,
-     490,   492,   494
+       0,    90,    90,    91,    97,    95,   106,   104,   118,   120,
+     121,   122,   123,   124,   130,   128,   137,   138,   142,   144,
+     151,   149,   158,   160,   165,   166,   167,   168,   175,   173,
+     185,   183,   194,   195,   196,   197,   198,   199,   200,   201,
+     202,   203,   204,   205,   206,   207,   208,   212,   213,   214,
+     215,   216,   217,   218,   219,   220,   221,   222,   223,   224,
+     225,   226,   227,   230,   232,   233,   234,   240,   238,   249,
+     247,   255,   257,   258,   259,   260,   266,   264,   272,   274,
+     275,   276,   277,   280,   282,   286,   290,   291,   292,   301,
+     298,   309,   306,   316,   317,   322,   332,   329,   340,   341,
+     346,   347,   351,   353,   360,   358,   367,   368,   374,   372,
+     378,   387,   388,   395,   396,   397,   398,   399,   400,   401,
+     402,   403,   404,   405,   406,   407,   413,   414,   415,   416,
+     417,   418,   419,   420,   421,   422,   423,   424,   425,   426,
+     427,   428,   429,   430,   431,   432,   433,   434,   435,   436,
+     437,   438,   439,   440,   441,   442,   446,   447,   448,   449,
+     450,   451,   452,   453,   454,   455,   456,   457,   458,   459,
+     460,   461,   462,   463,   464,   465,   466,   467,   468,   469,
+     470,   471,   472,   473,   474,   475,   482,   479,   489,   491,
+     495,   497,   499
     };
   }
 
