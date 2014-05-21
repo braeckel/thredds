@@ -57,7 +57,7 @@ abstract public class SaxEventHandler extends DefaultHandler
     //////////////////////////////////////////////////
     // Get/Set
     public Locator
-    getLocation()
+    getLocator()
     {
         return this.locator;
     }
