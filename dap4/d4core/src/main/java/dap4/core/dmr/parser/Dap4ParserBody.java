@@ -291,7 +291,7 @@ public int yylex() {return 0;}
 public void yyerror(String s)
 {
 System.err.println(s);
-System.errr.println("near %s\n",this.locator());
+System.err.printf("near %s\n",getLocation());
 }
 
 
