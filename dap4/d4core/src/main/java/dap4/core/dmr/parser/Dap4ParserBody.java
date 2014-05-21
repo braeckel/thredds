@@ -1,4 +1,4 @@
-/* A Bison parser, made by GNU Bison 3.0.2.  */
+/* A Bison parser, made by GNU Bison 3.0.  */
 
 /* Skeleton implementation for Bison LALR(1) parsers in Java
 
@@ -37,7 +37,7 @@ package dap4.core.dmr.parser;
 
 /* "Dap4ParserBody.java":39  */ /* lalr1.java:92  */
 /* "%code imports" blocks.  */
-/* "dap4.y":13  */ /* lalr1.java:93  */
+/* "dap4.y":16  */ /* lalr1.java:93  */
 
 import dap4.core.util.DapException;
 
@@ -51,7 +51,7 @@ import dap4.core.util.DapException;
 abstract class Dap4ParserBody extends Dap4Actions
 {
     /** Version number for the Bison executable that generated this parser.  */
-  public static final String bisonVersion = "3.0.2";
+  public static final String bisonVersion = "3.0";
 
   /** Name of the skeleton that generated this parser.  */
   public static final String bisonSkeleton = "lalr1.java";
@@ -76,8 +76,65 @@ abstract class Dap4ParserBody extends Dap4Actions
 
 
 
+  /**
+   * A class defining a pair of positions.  Positions, defined by the
+   * <code>Bison.Position</code> class, denote a point in the input.
+   * Locations represent a part of the input through the beginning
+   * and ending positions.
+   */
+  public class Bison.Location {
+    /**
+     * The first, inclusive, position in the range.
+     */
+    public Bison.Position begin;
+
+    /**
+     * The first position beyond the range.
+     */
+    public Bison.Position end;
+
+    /**
+     * Create a <code>Bison.Location</code> denoting an empty range located at
+     * a given point.
+     * @param loc The position at which the range is anchored.
+     */
+    public Bison.Location (Bison.Position loc) {
+      this.begin = this.end = loc;
+    }
+
+    /**
+     * Create a <code>Bison.Location</code> from the endpoints of the range.
+     * @param begin The first position included in the range.
+     * @param end   The first position beyond the range.
+     */
+    public Bison.Location (Bison.Position begin, Bison.Position end) {
+      this.begin = begin;
+      this.end = end;
+    }
+
+    /**
+     * Print a representation of the location.  For this to be correct,
+     * <code>Bison.Position</code> should override the <code>equals</code>
+     * method.
+     */
+    public String toString () {
+      if (begin.equals (end))
+        return begin.toString ();
+      else
+        return begin.toString () + "-" + end.toString ();
+    }
+  }
+
+
 
   
+  private Bison.Location yylloc (YYStack rhs, int n)
+  {
+    if (n > 0)
+      return new Bison.Location (rhs.locationAt (n-1).begin, rhs.locationAt (0).end);
+    else
+      return new Bison.Location (rhs.locationAt (0).end);
+  }
 
   /**
    * Communication interface between the scanner and the Bison-generated
@@ -256,7 +313,17 @@ abstract class Dap4ParserBody extends Dap4Actions
     static final int _UNKNOWN_ELEMENT = 340;
 
 
-    
+    /**
+     * Method to retrieve the beginning position of the last scanned token.
+     * @return the position at which the last scanned token starts.
+     */
+    Bison.Position getStartPos ();
+
+    /**
+     * Method to retrieve the ending position of the last scanned token.
+     * @return the first position beyond the last scanned token.
+     */
+    Bison.Position getEndPos ();
 
     /**
      * Method to retrieve the semantic value of the last scanned token.
@@ -267,35 +334,38 @@ abstract class Dap4ParserBody extends Dap4Actions
     /**
      * Entry point for the scanner.  Returns the token identifier corresponding
      * to the next token and prepares to return the semantic value
-     * of the token.
+     * and beginning/ending positions of the token.
      * @return the token identifier corresponding to the next token.
      */
     int yylex () throws DapException;
 
     /**
      * Entry point for error reporting.  Emits an error
-     * in a user-defined way.
+     * referring to the given location in a user-defined way.
      *
-     * 
+     * @param loc The location of the element to which the
+     *                error message is related
      * @param msg The string for the error message.
      */
-     void yyerror (String msg);
+     void yyerror (Bison.Location loc, String msg);
   }
 
   private class YYLexer implements Lexer {
 /* "%code lexer" blocks.  */
-/* "dap4.y":17  */ /* lalr1.java:236  */
+/* "dap4.y":20  */ /* lalr1.java:236  */
 
 public Object getLVal() {return null;}
 public int yylex() {return 0;}
-public void yyerror(String s)
+public Bison.Position getStartPos() {return null;}
+public Bison.Position getEndPos() {return null;}
+public void yyerror(Bison.Location loc, String s)
 {
-System.err.println(s);
-System.errr.println("near %s\n",this.locator());
+  System.err.println(s);
+  System.err.printf("near %s\n",loc.toString());
 }
 
 
-/* "Dap4ParserBody.java":299  */ /* lalr1.java:236  */
+/* "Dap4ParserBody.java":369  */ /* lalr1.java:236  */
 
   }
 
@@ -360,14 +430,33 @@ System.errr.println("near %s\n",this.locator());
 
   /**
    * Print an error message via the lexer.
-   *
+   * Use a <code>null</code> location.
    * @param msg The error message.
    */
   public final void yyerror (String msg)
   {
-    yylexer.yyerror (msg);
+    yylexer.yyerror ((Bison.Location)null, msg);
   }
 
+  /**
+   * Print an error message via the lexer.
+   * @param loc The location associated with the message.
+   * @param msg The error message.
+   */
+  public final void yyerror (Bison.Location loc, String msg)
+  {
+    yylexer.yyerror (loc, msg);
+  }
+
+  /**
+   * Print an error message via the lexer.
+   * @param pos The position associated with the message.
+   * @param msg The error message.
+   */
+  public final void yyerror (Bison.Position pos, String msg)
+  {
+    yylexer.yyerror (new Bison.Location (pos), msg);
+  }
 
   protected final void yycdebug (String s) {
     if (yydebug > 0)
@@ -376,13 +465,13 @@ System.errr.println("near %s\n",this.locator());
 
   private final class YYStack {
     private int[] stateStack = new int[16];
-    
+    private Bison.Location[] locStack = new Bison.Location[16];
     private Object[] valueStack = new Object[16];
 
     public int size = 16;
     public int height = -1;
 
-    public final void push (int state, Object value                            ) {
+    public final void push (int state, Object value                            , Bison.Location loc) {
       height++;
       if (size == height)
         {
@@ -390,6 +479,9 @@ System.errr.println("near %s\n",this.locator());
           System.arraycopy (stateStack, 0, newStateStack, 0, height);
           stateStack = newStateStack;
           
+          Bison.Location[] newLocStack = new Bison.Location[size * 2];
+          System.arraycopy (locStack, 0, newLocStack, 0, height);
+          locStack = newLocStack;
 
           Object[] newValueStack = new Object[size * 2];
           System.arraycopy (valueStack, 0, newValueStack, 0, height);
@@ -399,7 +491,7 @@ System.errr.println("near %s\n",this.locator());
         }
 
       stateStack[height] = state;
-      
+      locStack[height] = loc;
       valueStack[height] = value;
     }
 
@@ -411,13 +503,17 @@ System.errr.println("near %s\n",this.locator());
       // Avoid memory leaks... garbage collection is a white lie!
       if (num > 0) {
         java.util.Arrays.fill (valueStack, height - num + 1, height + 1, null);
-        
+        java.util.Arrays.fill (locStack, height - num + 1, height + 1, null);
       }
       height -= num;
     }
 
     public final int stateAt (int i) {
       return stateStack[height - i];
+    }
+
+    public final Bison.Location locationAt (int i) {
+      return locStack[height - i];
     }
 
     public final Object valueAt (int i) {
@@ -490,7 +586,11 @@ System.errr.println("near %s\n",this.locator());
 
     /* Error handling.  */
     int yynerrs_ = 0;
-    
+    /* The location where the error started.  */
+    Bison.Location yyerrloc = null;
+
+    /* Location. */
+    Bison.Location yylloc = new Bison.Location (null, null);
 
     /* Semantic value of the lookahead.  */
     Object yylval = null;
@@ -505,23 +605,10 @@ System.errr.println("near %s\n",this.locator());
     return yyerrstatus_ == 0;
   }
 
-  /** Compute post-reduction state.
-   * @param yystate   the current state
-   * @param yysym     the nonterminal to push on the stack
-   */
-  private int yy_lr_goto_state_ (int yystate, int yysym)
-  {
-    int yyr = yypgoto_[yysym - yyntokens_] + yystate;
-    if (0 <= yyr && yyr <= yylast_ && yycheck_[yyr] == yystate)
-      return yytable_[yyr];
-    else
-      return yydefgoto_[yysym - yyntokens_];
-  }
-
   private int yyaction (int yyn, YYStack yystack, int yylen) throws DapException
   {
     Object yyval;
-    
+    Bison.Location yyloc = yylloc (yystack, yylen);
 
     /* If YYLEN is nonzero, implement the default value of the action:
        '$$ = $1'.  Otherwise, use the top of the stack.
@@ -540,549 +627,556 @@ System.errr.println("near %s\n",this.locator());
       {
           case 4:
   if (yyn == 4)
-    /* "dap4.y":97  */ /* lalr1.java:489  */
+    /* "dap4.y":102  */ /* lalr1.java:476  */
     {enterdataset(((XMLAttributeMap)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 5:
   if (yyn == 5)
-    /* "dap4.y":100  */ /* lalr1.java:489  */
+    /* "dap4.y":105  */ /* lalr1.java:476  */
     {leavedataset();};
   break;
     
 
   case 6:
   if (yyn == 6)
-    /* "dap4.y":106  */ /* lalr1.java:489  */
+    /* "dap4.y":111  */ /* lalr1.java:476  */
     {entergroup(((SaxEvent)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 7:
   if (yyn == 7)
-    /* "dap4.y":109  */ /* lalr1.java:489  */
+    /* "dap4.y":114  */ /* lalr1.java:476  */
     {leavegroup();};
   break;
     
 
   case 14:
   if (yyn == 14)
-    /* "dap4.y":130  */ /* lalr1.java:489  */
+    /* "dap4.y":135  */ /* lalr1.java:476  */
     {enterenumdef(((XMLAttributeMap)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 15:
   if (yyn == 15)
-    /* "dap4.y":133  */ /* lalr1.java:489  */
+    /* "dap4.y":138  */ /* lalr1.java:476  */
     {leaveenumdef();};
   break;
     
 
   case 18:
   if (yyn == 18)
-    /* "dap4.y":143  */ /* lalr1.java:489  */
+    /* "dap4.y":148  */ /* lalr1.java:476  */
     {enumconst(((SaxEvent)(yystack.valueAt (4-(2)))),((SaxEvent)(yystack.valueAt (4-(3)))));};
   break;
     
 
   case 19:
   if (yyn == 19)
-    /* "dap4.y":145  */ /* lalr1.java:489  */
+    /* "dap4.y":150  */ /* lalr1.java:476  */
     {enumconst(((SaxEvent)(yystack.valueAt (4-(3)))),((SaxEvent)(yystack.valueAt (4-(2)))));};
   break;
     
 
   case 20:
   if (yyn == 20)
-    /* "dap4.y":151  */ /* lalr1.java:489  */
+    /* "dap4.y":156  */ /* lalr1.java:476  */
     {enterdimdef(((XMLAttributeMap)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 21:
   if (yyn == 21)
-    /* "dap4.y":154  */ /* lalr1.java:489  */
+    /* "dap4.y":159  */ /* lalr1.java:476  */
     {leavedimdef();};
   break;
     
 
   case 22:
   if (yyn == 22)
-    /* "dap4.y":159  */ /* lalr1.java:489  */
+    /* "dap4.y":164  */ /* lalr1.java:476  */
     {dimref(((SaxEvent)(yystack.valueAt (3-(2)))));};
   break;
     
 
   case 23:
   if (yyn == 23)
-    /* "dap4.y":161  */ /* lalr1.java:489  */
+    /* "dap4.y":166  */ /* lalr1.java:476  */
     {dimref(((SaxEvent)(yystack.valueAt (3-(2)))));};
   break;
     
 
   case 28:
   if (yyn == 28)
-    /* "dap4.y":175  */ /* lalr1.java:489  */
+    /* "dap4.y":180  */ /* lalr1.java:476  */
     {enteratomicvariable(((SaxEvent)(yystack.valueAt (2-(1)))),((SaxEvent)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 29:
   if (yyn == 29)
-    /* "dap4.y":178  */ /* lalr1.java:489  */
+    /* "dap4.y":183  */ /* lalr1.java:476  */
     {leaveatomicvariable(((SaxEvent)(yystack.valueAt (5-(5)))));};
   break;
     
 
   case 30:
   if (yyn == 30)
-    /* "dap4.y":185  */ /* lalr1.java:489  */
+    /* "dap4.y":190  */ /* lalr1.java:476  */
     {enterenumvariable(((XMLAttributeMap)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 31:
   if (yyn == 31)
-    /* "dap4.y":188  */ /* lalr1.java:489  */
+    /* "dap4.y":193  */ /* lalr1.java:476  */
     {leaveenumvariable(((SaxEvent)(yystack.valueAt (5-(5)))));};
   break;
     
 
   case 32:
   if (yyn == 32)
-    /* "dap4.y":194  */ /* lalr1.java:489  */
+    /* "dap4.y":199  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 33:
   if (yyn == 33)
-    /* "dap4.y":195  */ /* lalr1.java:489  */
+    /* "dap4.y":200  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 34:
   if (yyn == 34)
-    /* "dap4.y":196  */ /* lalr1.java:489  */
+    /* "dap4.y":201  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 35:
   if (yyn == 35)
-    /* "dap4.y":197  */ /* lalr1.java:489  */
+    /* "dap4.y":202  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 36:
   if (yyn == 36)
-    /* "dap4.y":198  */ /* lalr1.java:489  */
+    /* "dap4.y":203  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 37:
   if (yyn == 37)
-    /* "dap4.y":199  */ /* lalr1.java:489  */
+    /* "dap4.y":204  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 38:
   if (yyn == 38)
-    /* "dap4.y":200  */ /* lalr1.java:489  */
+    /* "dap4.y":205  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 39:
   if (yyn == 39)
-    /* "dap4.y":201  */ /* lalr1.java:489  */
+    /* "dap4.y":206  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 40:
   if (yyn == 40)
-    /* "dap4.y":202  */ /* lalr1.java:489  */
+    /* "dap4.y":207  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 41:
   if (yyn == 41)
-    /* "dap4.y":203  */ /* lalr1.java:489  */
+    /* "dap4.y":208  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 42:
   if (yyn == 42)
-    /* "dap4.y":204  */ /* lalr1.java:489  */
+    /* "dap4.y":209  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 43:
   if (yyn == 43)
-    /* "dap4.y":205  */ /* lalr1.java:489  */
+    /* "dap4.y":210  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 44:
   if (yyn == 44)
-    /* "dap4.y":206  */ /* lalr1.java:489  */
+    /* "dap4.y":211  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 45:
   if (yyn == 45)
-    /* "dap4.y":207  */ /* lalr1.java:489  */
+    /* "dap4.y":212  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 46:
   if (yyn == 46)
-    /* "dap4.y":208  */ /* lalr1.java:489  */
+    /* "dap4.y":213  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 47:
   if (yyn == 47)
-    /* "dap4.y":212  */ /* lalr1.java:489  */
+    /* "dap4.y":217  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 48:
   if (yyn == 48)
-    /* "dap4.y":213  */ /* lalr1.java:489  */
+    /* "dap4.y":218  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 49:
   if (yyn == 49)
-    /* "dap4.y":214  */ /* lalr1.java:489  */
+    /* "dap4.y":219  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 50:
   if (yyn == 50)
-    /* "dap4.y":215  */ /* lalr1.java:489  */
+    /* "dap4.y":220  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 51:
   if (yyn == 51)
-    /* "dap4.y":216  */ /* lalr1.java:489  */
+    /* "dap4.y":221  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 52:
   if (yyn == 52)
-    /* "dap4.y":217  */ /* lalr1.java:489  */
+    /* "dap4.y":222  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 53:
   if (yyn == 53)
-    /* "dap4.y":218  */ /* lalr1.java:489  */
+    /* "dap4.y":223  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 54:
   if (yyn == 54)
-    /* "dap4.y":219  */ /* lalr1.java:489  */
+    /* "dap4.y":224  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 55:
   if (yyn == 55)
-    /* "dap4.y":220  */ /* lalr1.java:489  */
+    /* "dap4.y":225  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 56:
   if (yyn == 56)
-    /* "dap4.y":221  */ /* lalr1.java:489  */
+    /* "dap4.y":226  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 57:
   if (yyn == 57)
-    /* "dap4.y":222  */ /* lalr1.java:489  */
+    /* "dap4.y":227  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 58:
   if (yyn == 58)
-    /* "dap4.y":223  */ /* lalr1.java:489  */
+    /* "dap4.y":228  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 59:
   if (yyn == 59)
-    /* "dap4.y":224  */ /* lalr1.java:489  */
+    /* "dap4.y":229  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 60:
   if (yyn == 60)
-    /* "dap4.y":225  */ /* lalr1.java:489  */
+    /* "dap4.y":230  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 61:
   if (yyn == 61)
-    /* "dap4.y":226  */ /* lalr1.java:489  */
+    /* "dap4.y":231  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 62:
   if (yyn == 62)
-    /* "dap4.y":227  */ /* lalr1.java:489  */
+    /* "dap4.y":232  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 67:
   if (yyn == 67)
-    /* "dap4.y":240  */ /* lalr1.java:489  */
+    /* "dap4.y":245  */ /* lalr1.java:476  */
     {entermap(((SaxEvent)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 68:
   if (yyn == 68)
-    /* "dap4.y":243  */ /* lalr1.java:489  */
+    /* "dap4.y":248  */ /* lalr1.java:476  */
     {leavemap();};
   break;
     
 
   case 69:
   if (yyn == 69)
-    /* "dap4.y":249  */ /* lalr1.java:489  */
+    /* "dap4.y":254  */ /* lalr1.java:476  */
     {enterstructurevariable(((SaxEvent)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 70:
   if (yyn == 70)
-    /* "dap4.y":252  */ /* lalr1.java:489  */
+    /* "dap4.y":257  */ /* lalr1.java:476  */
     {leavestructurevariable(((SaxEvent)(yystack.valueAt (5-(5)))));};
   break;
     
 
   case 76:
   if (yyn == 76)
-    /* "dap4.y":266  */ /* lalr1.java:489  */
+    /* "dap4.y":271  */ /* lalr1.java:476  */
     {entersequencevariable(((SaxEvent)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 77:
   if (yyn == 77)
-    /* "dap4.y":269  */ /* lalr1.java:489  */
+    /* "dap4.y":274  */ /* lalr1.java:476  */
     {leavesequencevariable(((SaxEvent)(yystack.valueAt (5-(5)))));};
   break;
     
 
   case 89:
   if (yyn == 89)
-    /* "dap4.y":301  */ /* lalr1.java:489  */
+    /* "dap4.y":306  */ /* lalr1.java:476  */
     {enteratomicattribute(((XMLAttributeMap)(yystack.valueAt (3-(2)))),((NamespaceList)(yystack.valueAt (3-(3)))));};
   break;
     
 
   case 90:
   if (yyn == 90)
-    /* "dap4.y":304  */ /* lalr1.java:489  */
+    /* "dap4.y":309  */ /* lalr1.java:476  */
     {leaveatomicattribute();};
   break;
     
 
   case 91:
   if (yyn == 91)
-    /* "dap4.y":309  */ /* lalr1.java:489  */
+    /* "dap4.y":314  */ /* lalr1.java:476  */
     {enteratomicattribute(((XMLAttributeMap)(yystack.valueAt (3-(2)))),((NamespaceList)(yystack.valueAt (3-(3)))));};
   break;
     
 
   case 92:
   if (yyn == 92)
-    /* "dap4.y":311  */ /* lalr1.java:489  */
+    /* "dap4.y":316  */ /* lalr1.java:476  */
     {leaveatomicattribute();};
   break;
     
 
   case 93:
   if (yyn == 93)
-    /* "dap4.y":316  */ /* lalr1.java:489  */
+    /* "dap4.y":321  */ /* lalr1.java:476  */
     {yyval=namespace_list();};
   break;
     
 
   case 94:
   if (yyn == 94)
-    /* "dap4.y":318  */ /* lalr1.java:489  */
+    /* "dap4.y":323  */ /* lalr1.java:476  */
     {yyval=namespace_list(((NamespaceList)(yystack.valueAt (2-(1)))),((SaxEvent)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 95:
   if (yyn == 95)
-    /* "dap4.y":325  */ /* lalr1.java:489  */
+    /* "dap4.y":330  */ /* lalr1.java:476  */
     {yyval=(((SaxEvent)(yystack.valueAt (3-(2)))));};
   break;
     
 
   case 96:
   if (yyn == 96)
-    /* "dap4.y":332  */ /* lalr1.java:489  */
+    /* "dap4.y":337  */ /* lalr1.java:476  */
     {entercontainerattribute(((XMLAttributeMap)(yystack.valueAt (3-(2)))),((NamespaceList)(yystack.valueAt (3-(3)))));};
   break;
     
 
   case 97:
   if (yyn == 97)
-    /* "dap4.y":335  */ /* lalr1.java:489  */
+    /* "dap4.y":340  */ /* lalr1.java:476  */
     {leavecontainerattribute();};
   break;
     
 
   case 102:
   if (yyn == 102)
-    /* "dap4.y":352  */ /* lalr1.java:489  */
+    /* "dap4.y":357  */ /* lalr1.java:476  */
     {value(((SaxEvent)(yystack.valueAt (3-(2)))));};
   break;
     
 
   case 103:
   if (yyn == 103)
-    /* "dap4.y":354  */ /* lalr1.java:489  */
+    /* "dap4.y":359  */ /* lalr1.java:476  */
     {value(((SaxEvent)(yystack.valueAt (3-(2)))));};
   break;
     
 
   case 104:
   if (yyn == 104)
-    /* "dap4.y":360  */ /* lalr1.java:489  */
+    /* "dap4.y":365  */ /* lalr1.java:476  */
     {enterotherxml(((XMLAttributeMap)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 105:
   if (yyn == 105)
-    /* "dap4.y":363  */ /* lalr1.java:489  */
+    /* "dap4.y":368  */ /* lalr1.java:476  */
     {leaveotherxml();};
   break;
     
 
   case 108:
   if (yyn == 108)
-    /* "dap4.y":374  */ /* lalr1.java:489  */
+    /* "dap4.y":379  */ /* lalr1.java:476  */
     {enterxmlelement(((SaxEvent)(yystack.valueAt (2-(1)))),((XMLAttributeMap)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 109:
   if (yyn == 109)
-    /* "dap4.y":377  */ /* lalr1.java:489  */
+    /* "dap4.y":382  */ /* lalr1.java:476  */
     {leavexmlelement(((SaxEvent)(yystack.valueAt (5-(5)))));};
   break;
     
 
   case 110:
   if (yyn == 110)
-    /* "dap4.y":379  */ /* lalr1.java:489  */
+    /* "dap4.y":384  */ /* lalr1.java:476  */
     {xmltext(((SaxEvent)(yystack.valueAt (1-(1)))));};
   break;
     
 
   case 111:
   if (yyn == 111)
-    /* "dap4.y":387  */ /* lalr1.java:489  */
+    /* "dap4.y":392  */ /* lalr1.java:476  */
     {yyval=xml_attribute_map();};
   break;
     
 
   case 112:
   if (yyn == 112)
-    /* "dap4.y":389  */ /* lalr1.java:489  */
+    /* "dap4.y":394  */ /* lalr1.java:476  */
     {yyval=xml_attribute_map(((XMLAttributeMap)(yystack.valueAt (2-(1)))),((SaxEvent)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 186:
   if (yyn == 186)
-    /* "dap4.y":482  */ /* lalr1.java:489  */
+    /* "dap4.y":487  */ /* lalr1.java:476  */
     {entererror(((XMLAttributeMap)(yystack.valueAt (2-(2)))));};
   break;
     
 
   case 187:
   if (yyn == 187)
-    /* "dap4.y":486  */ /* lalr1.java:489  */
+    /* "dap4.y":491  */ /* lalr1.java:476  */
     {leaveerror();};
   break;
     
 
   case 190:
   if (yyn == 190)
-    /* "dap4.y":496  */ /* lalr1.java:489  */
+    /* "dap4.y":501  */ /* lalr1.java:476  */
     {errormessage(((SaxEvent)(yystack.valueAt (3-(2)))));};
   break;
     
 
   case 191:
   if (yyn == 191)
-    /* "dap4.y":498  */ /* lalr1.java:489  */
+    /* "dap4.y":503  */ /* lalr1.java:476  */
     {errorcontext(((SaxEvent)(yystack.valueAt (3-(2)))));};
   break;
     
 
   case 192:
   if (yyn == 192)
-    /* "dap4.y":500  */ /* lalr1.java:489  */
+    /* "dap4.y":505  */ /* lalr1.java:476  */
     {errorotherinfo(((SaxEvent)(yystack.valueAt (3-(2)))));};
   break;
     
 
 
-/* "Dap4ParserBody.java":1075  */ /* lalr1.java:489  */
+/* "Dap4ParserBody.java":1162  */ /* lalr1.java:476  */
         default: break;
       }
 
-    yy_symbol_print ("-> $$ =", yyr1_[yyn], yyval);
+    yy_symbol_print ("-> $$ =", yyr1_[yyn], yyval, yyloc);
 
     yystack.pop (yylen);
     yylen = 0;
 
     /* Shift the result of the reduction.  */
-    int yystate = yy_lr_goto_state_ (yystack.stateAt (0), yyr1_[yyn]);
-    yystack.push (yystate, yyval);
+    yyn = yyr1_[yyn];
+    int yystate = yypgoto_[yyn - yyntokens_] + yystack.stateAt (0);
+    if (0 <= yystate && yystate <= yylast_
+        && yycheck_[yystate] == yystack.stateAt (0))
+      yystate = yytable_[yystate];
+    else
+      yystate = yydefgoto_[yyn - yyntokens_];
+
+    yystack.push (yystate, yyval, yyloc);
     return YYNEWSTATE;
   }
 
@@ -1128,11 +1222,12 @@ System.errr.println("near %s\n",this.locator());
   `--------------------------------*/
 
   private void yy_symbol_print (String s, int yytype,
-                                 Object yyvaluep                                 )
+                                 Object yyvaluep                                 , Object yylocationp)
   {
     if (yydebug > 0)
     yycdebug (s + (yytype < yyntokens_ ? " token " : " nterm ")
               + yytname_[yytype] + " ("
+              + yylocationp + ": "
               + (yyvaluep == null ? "(null)" : yyvaluep.toString ()) + ")");
   }
 
@@ -1143,14 +1238,15 @@ System.errr.println("near %s\n",this.locator());
    *
    * @param yylextoken current token
    * @param yylexval current lval
-
+   * @param yylexloc current position
    *
    * @return <tt>YYACCEPT, YYABORT, YYPUSH_MORE</tt>
    */
-  public int push_parse (int yylextoken, Object yylexval)
+  public int push_parse (int yylextoken, Object yylexval, Bison.Location yylexloc)
       throws DapException, DapException
   {
-    
+    /* @$.  */
+    Bison.Location yyloc;
 
 
     if (!this.push_parse_initialized)
@@ -1197,6 +1293,7 @@ System.errr.println("near %s\n",this.locator());
             yycdebug ("Reading a token: ");
             yychar = yylextoken;
             yylval = yylexval;
+            yylloc = yylexloc;
             push_token_consumed = false;
 
           }
@@ -1211,7 +1308,7 @@ System.errr.println("near %s\n",this.locator());
           {
             yytoken = yytranslate_ (yychar);
             yy_symbol_print ("Next token is", yytoken,
-                             yylval);
+                             yylval, yylloc);
           }
 
         /* If the proper action on seeing token YYTOKEN is to reduce or to
@@ -1236,7 +1333,7 @@ System.errr.println("near %s\n",this.locator());
           {
             /* Shift the lookahead token.  */
             yy_symbol_print ("Shifting", yytoken,
-                             yylval);
+                             yylval, yylloc);
 
             /* Discard the token being shifted.  */
             yychar = yyempty_;
@@ -1247,7 +1344,7 @@ System.errr.println("near %s\n",this.locator());
               --yyerrstatus_;
 
             yystate = yyn;
-            yystack.push (yystate, yylval);
+            yystack.push (yystate, yylval, yylloc);
             label = YYNEWSTATE;
           }
         break;
@@ -1282,10 +1379,10 @@ System.errr.println("near %s\n",this.locator());
             ++yynerrs_;
             if (yychar == yyempty_)
               yytoken = yyempty_;
-            yyerror (yysyntax_error (yystate, yytoken));
+            yyerror (yylloc, yysyntax_error (yystate, yytoken));
           }
 
-        
+        yyerrloc = yylloc;
         if (yyerrstatus_ == 3)
           {
         /* If just tried and failed to reuse lookahead token after an
@@ -1311,7 +1408,7 @@ System.errr.println("near %s\n",this.locator());
       `-------------------------------------------------*/
       case YYERROR:
 
-        
+        yyerrloc = yystack.locationAt (yylen - 1);
         /* Do not reclaim the symbols of the rule which action triggered
            this YYERROR.  */
         yystack.pop (yylen);
@@ -1345,7 +1442,7 @@ System.errr.println("near %s\n",this.locator());
             if (yystack.height == 0)
               {label = YYABORT; break;}
 
-            
+            yyerrloc = yystack.locationAt (0);
             yystack.pop ();
             yystate = yystack.stateAt (0);
             if (yydebug > 0)
@@ -1357,13 +1454,18 @@ System.errr.println("near %s\n",this.locator());
             break;
 
 
+        /* Muck with the stack to setup for yylloc.  */
+        yystack.push (0, null, yylloc);
+        yystack.push (0, null, yyerrloc);
+        yyloc = yylloc (yystack, 2);
+        yystack.pop (2);
 
         /* Shift the error token.  */
         yy_symbol_print ("Shifting", yystos_[yyn],
-                         yylval);
+                         yylval, yyloc);
 
         yystate = yyn;
-        yystack.push (yyn, yylval);
+        yystack.push (yyn, yylval, yyloc);
         label = YYNEWSTATE;
         break;
 
@@ -1397,15 +1499,32 @@ System.errr.println("near %s\n",this.locator());
 
     /* Error handling.  */
     this.yynerrs_ = 0;
-    
+    /* The location where the error started.  */
+    this.yyerrloc = null;
+    this.yylloc = new Bison.Location (null, null);
 
     /* Semantic value of the lookahead.  */
     this.yylval = null;
 
-    yystack.push (this.yystate, this.yylval);
+    yystack.push (this.yystate, this.yylval, this.yylloc);
 
     this.push_parse_initialized = true;
 
+  }
+
+  /**
+   * Push parse given input from an external lexer.
+   *
+   * @param yylextoken current token
+   * @param yylexval current lval
+   * @param yylexpos current position
+   *
+   * @return <tt>YYACCEPT, YYABORT, YYPUSH_MORE</tt>
+   */
+  public int push_parse (int yylextoken, Object yylexval, Bison.Position yylexpos)
+      throws DapException, DapException
+  {
+    return push_parse (yylextoken, yylexval, new Bison.Location (yylexpos));
   }
 
 
@@ -1866,26 +1985,26 @@ private static final short yycheck_[] = yycheck_init();
   {
     return new short[]
     {
-       0,    90,    90,    91,    97,    95,   106,   104,   118,   120,
-     121,   122,   123,   124,   130,   128,   137,   138,   142,   144,
-     151,   149,   158,   160,   165,   166,   167,   168,   175,   173,
-     185,   183,   194,   195,   196,   197,   198,   199,   200,   201,
-     202,   203,   204,   205,   206,   207,   208,   212,   213,   214,
-     215,   216,   217,   218,   219,   220,   221,   222,   223,   224,
-     225,   226,   227,   230,   232,   233,   234,   240,   238,   249,
-     247,   255,   257,   258,   259,   260,   266,   264,   272,   274,
-     275,   276,   277,   280,   282,   286,   290,   291,   292,   301,
-     298,   309,   306,   316,   317,   322,   332,   329,   340,   341,
-     346,   347,   351,   353,   360,   358,   367,   368,   374,   372,
-     378,   387,   388,   395,   396,   397,   398,   399,   400,   401,
-     402,   403,   404,   405,   406,   407,   413,   414,   415,   416,
-     417,   418,   419,   420,   421,   422,   423,   424,   425,   426,
-     427,   428,   429,   430,   431,   432,   433,   434,   435,   436,
-     437,   438,   439,   440,   441,   442,   446,   447,   448,   449,
-     450,   451,   452,   453,   454,   455,   456,   457,   458,   459,
-     460,   461,   462,   463,   464,   465,   466,   467,   468,   469,
-     470,   471,   472,   473,   474,   475,   482,   479,   489,   491,
-     495,   497,   499
+       0,    95,    95,    96,   102,   100,   111,   109,   123,   125,
+     126,   127,   128,   129,   135,   133,   142,   143,   147,   149,
+     156,   154,   163,   165,   170,   171,   172,   173,   180,   178,
+     190,   188,   199,   200,   201,   202,   203,   204,   205,   206,
+     207,   208,   209,   210,   211,   212,   213,   217,   218,   219,
+     220,   221,   222,   223,   224,   225,   226,   227,   228,   229,
+     230,   231,   232,   235,   237,   238,   239,   245,   243,   254,
+     252,   260,   262,   263,   264,   265,   271,   269,   277,   279,
+     280,   281,   282,   285,   287,   291,   295,   296,   297,   306,
+     303,   314,   311,   321,   322,   327,   337,   334,   345,   346,
+     351,   352,   356,   358,   365,   363,   372,   373,   379,   377,
+     383,   392,   393,   400,   401,   402,   403,   404,   405,   406,
+     407,   408,   409,   410,   411,   412,   418,   419,   420,   421,
+     422,   423,   424,   425,   426,   427,   428,   429,   430,   431,
+     432,   433,   434,   435,   436,   437,   438,   439,   440,   441,
+     442,   443,   444,   445,   446,   447,   451,   452,   453,   454,
+     455,   456,   457,   458,   459,   460,   461,   462,   463,   464,
+     465,   466,   467,   468,   469,   470,   471,   472,   473,   474,
+     475,   476,   477,   478,   479,   480,   487,   484,   494,   496,
+     500,   502,   504
     };
   }
 
@@ -1906,7 +2025,8 @@ private static final short yycheck_[] = yycheck_init();
     for (int yyi = 0; yyi < yynrhs; yyi++)
       yy_symbol_print ("   $" + (yyi + 1) + " =",
                        yystos_[yystack.stateAt(yynrhs - (yyi + 1))],
-                       ((yystack.valueAt (yynrhs-(yyi + 1)))));
+                       ((yystack.valueAt (yynrhs-(yyi + 1)))),
+                       yystack.locationAt (yynrhs-(yyi + 1)));
   }
 
   /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */

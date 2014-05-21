@@ -1,8 +1,11 @@
 %language "Java"
 %debug
 %error-verbose
+%locations
 
 %define api.push-pull push
+%define api.position.type {Bison.Position}
+%define api.location.type {Bison.Location}
 %define abstract
 %define package {dap4.core.dmr.parser}
 %define parser_class_name {Dap4ParserBody}
@@ -17,10 +20,12 @@ import dap4.core.util.DapException;
 %code lexer {
 public Object getLVal() {return null;}
 public int yylex() {return 0;}
-public void yyerror(String s)
+public Bison.Position getStartPos() {return null;}
+public Bison.Position getEndPos() {return null;}
+public void yyerror(Bison.Location loc, String s)
 {
-System.err.println(s);
-System.errr.println("near %s\n",this.locator());
+  System.err.println(s);
+  System.err.printf("near %s\n",loc.toString());
 }
 
 }
