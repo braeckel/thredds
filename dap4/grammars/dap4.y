@@ -24,8 +24,8 @@ public Bison.Position getStartPos() {return null;}
 public Bison.Position getEndPos() {return null;}
 public void yyerror(Bison.Location loc, String s)
 {
-  System.err.println(s);
-  System.err.printf("near %s\n",loc.toString());
+System.err.println(s);
+System.err.printf("near %s\n",getLocator());
 }
 
 }
