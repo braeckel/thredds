@@ -8,6 +8,7 @@ import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
@@ -51,28 +52,27 @@ public class ChunkInputStream extends InputStream
     //////////////////////////////////////////////////
     // Instance variable
 
-    InputStream input = null;
-    State state = State.INITIAL;
-    ByteOrder order = null; // incoming byte order
-    RequestMode requestmode = null;
-    boolean localbigendian = true;
-    boolean remotebigendian = true;
+    protected InputStream input = null;
+    protected State state = State.INITIAL;
+    protected RequestMode requestmode = null;
+
+    protected ByteOrder localorder = null;
+    protected ByteOrder remoteorder = null;
 
     // State info for current chunk
-    int flags = 0;
-    int chunksize = 0;
-    int avail = 0;
+    protected int flags = 0;
+    protected int chunksize = 0;
+    protected int avail = 0;
 
 
     //////////////////////////////////////////////////
     // Constructor(s)
 
-    public ChunkInputStream(InputStream input, RequestMode requestmode, boolean bigendian)
+    public ChunkInputStream(InputStream input, RequestMode requestmode, ByteOrder order)
     {
         this.input = input;
         this.requestmode = requestmode;
-        this.localbigendian = bigendian;
-        this.order = bigendian ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN;
+        this.localorder = order;
     }
 
     //////////////////////////////////////////////////
@@ -80,7 +80,7 @@ public class ChunkInputStream extends InputStream
 
     public ByteOrder getByteOrder()
     {
-        return order;
+        return localorder;
     }
 
     //////////////////////////////////////////////////
@@ -127,7 +127,8 @@ public class ChunkInputStream extends InputStream
             dmr = dmr.trim();
 
             // Figure out the endian-ness of the response
-            this.remotebigendian = (flags & DapUtil.CHUNK_LITTLE_ENDIAN) == 0;
+            this.remoteorder = (flags & DapUtil.CHUNK_LITTLE_ENDIAN) == 0 ? ByteOrder.BIG_ENDIAN
+                                                                          : ByteOrder.LITTLE_ENDIAN;
 
             // Set the state
             if((flags & DapUtil.CHUNK_ERROR) != 0)
@@ -326,7 +327,7 @@ public class ChunkInputStream extends InputStream
      */
 
     boolean
-    readHeader(InputStream input)
+    readHeader(InputStream   input)
         throws IOException
     {
         int hdr = 0;
@@ -341,12 +342,11 @@ public class ChunkInputStream extends InputStream
         int b3 = input.read();
         if(b0 < 0 || b1 < 0 || b2 < 0 || b3 < 0)
             throw new IOException("Short binary chunk count");
-        if(this.localbigendian)
+        if(this.localorder == ByteOrder.BIG_ENDIAN)
             hdr = ((b0 << 24) | (b1 << 16) | (b2 << 8) | b3);
         else
             hdr = ((b3 << 24) | (b2 << 16) | (b1 << 8) | b0);
         reset(hdr);
         return true;
     }
-
 }

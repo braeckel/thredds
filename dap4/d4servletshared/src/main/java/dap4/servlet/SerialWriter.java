@@ -46,20 +46,11 @@ public class SerialWriter
     static final int COUNTSIZE = 8;
 
     //////////////////////////////////////////////////
-    // Type declarations
-
-    static enum State
-    {
-        INITIAL, DATASET, VARIABLE;
-    }
-
-    //////////////////////////////////////////////////
     // Instance variables
 
     ByteOrder order = null;
     OutputStream output = null;
     int depth = 0;
-    State state = State.INITIAL;
 
     java.util.zip.Checksum checksum;
     boolean checksumming = true;
@@ -76,7 +67,7 @@ public class SerialWriter
         this.output = output;
         this.order = order;
         this.longbuffer = ByteBuffer.allocate(8) //8==sizeof(long)
-            .order(order);
+            			.order(order);
         if("CRC32".equalsIgnoreCase(DapUtil.DIGESTER)) {
             // use the one from java.util.zip.CRC32
             checksum = new java.util.zip.CRC32();
@@ -118,6 +109,23 @@ public class SerialWriter
     encodeObject(DapType vtype, Object value)
         throws IOException
     {
+        return encodeObject(vtype,value,this.order);
+    }
+
+
+    /**
+     * Encode an array of primitive values.
+     *
+     * @param vtype The type of the object
+     * @param value The value
+     * @param order the byteorder to use
+     * @return bytebuffer encoding of the value using the
+     *         platform's native encoding.
+     */
+    static public ByteBuffer
+    encodeObject(DapType vtype, Object value, ByteOrder order)
+        throws IOException
+    {
         AtomicType atomtype = vtype.getPrimitiveType();
         int total = (int) AtomicType.getSize(atomtype);
         ByteBuffer buf = null;
@@ -138,17 +146,17 @@ public class SerialWriter
             break;
         case Int32:
         case UInt32:
-            buf.putInt((Integer) value);
+            buf.putInt(((Number) value).intValue());
             break;
         case Int64:
         case UInt64:
-            buf.putLong((Long) value);
+            buf.putLong(((Number) value).longValue());
             break;
         case Float32:
-            buf.putFloat((Float) value);
+            buf.putFloat(((Number) value).floatValue());
             break;
         case Float64:
-            buf.putDouble((Double) value);
+            buf.putDouble(((Number) value).doubleValue());
             break;
 
         case URL:
@@ -296,20 +304,6 @@ public class SerialWriter
     // Dataset oriented writes
 
     public void
-    startDataset()
-    {
-        assert (state == State.INITIAL) : "Internal Error";
-        state = State.DATASET;
-    }
-
-    public void
-    endDataset()
-    {
-        assert (state == State.DATASET && depth == 0) : "Internal Error";
-        state = State.INITIAL;
-    }
-
-    public void
     startGroup()
     {
     }
@@ -325,9 +319,6 @@ public class SerialWriter
     public void
     startVariable()
     {
-        assert ((state == State.DATASET && depth == 0)
-            || (state == State.VARIABLE && depth > 0)) : "Internal Error";
-        state = State.VARIABLE;
         if(depth == 0)
             checksum.reset();
         depth++;
@@ -337,7 +328,6 @@ public class SerialWriter
     endVariable()
         throws IOException
     {
-        assert (state == State.VARIABLE) : "Internal Error";
         depth--;
         if(depth == 0 && checksumming) {
             long digest = checksum.getValue(); // get the digest value
@@ -355,7 +345,6 @@ public class SerialWriter
             }
             // Write out the digest in binary form
             output.write(csum, 0, DapUtil.CHECKSUMSIZE);
-            state = State.DATASET;
         }
     }
 
@@ -378,6 +367,8 @@ public class SerialWriter
         int len = buf.position();
         if(checksumming)
             checksum.update(bytes, 0, len);
+        if(DEBUG)
+            DapDump.dumpbytes(buf);
         output.write(bytes, 0, len);
         if(DEBUG) {
             System.err.printf("%s: ", daptype.getShortName());

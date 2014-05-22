@@ -189,6 +189,12 @@ public class Dump
         buf.append("\n");
     }
 
+    public void
+    newline()
+    {
+        buf.append("\n");
+    }
+
     ByteBuffer
     readn(int n)
         throws IOException

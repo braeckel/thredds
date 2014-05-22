@@ -4,9 +4,12 @@
 package dap4.d4ts;
 
 import dap4.core.util.DapException;
-import dap4.servlet.DapLog;
+import dap4.dap4shared.XURI;
+import dap4.servlet.*;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,17 +56,26 @@ public class FrontPage
     //////////////////////////////////////////////////
     // Instance Variables
 
-    URLMap urlmap;
+    protected List<FileSource> activesources;
 
-    List<FileSource> activesources;
+    protected URLMap urlmap = null;
+
+    protected ServletInfo svcinfo = null;
 
     //////////////////////////////////////////////////
     // Constructor(s)
 
-    public FrontPage(String root, String urlprefix)
+    /**
+     *
+     * @param root the file directory root
+     * @param urlmap
+     * @throws DapException
+     */
+    public FrontPage(String root, URLMap urlmap, ServletInfo svcinfo)
+        throws DapException
     {
-        this.urlmap = new URLMapDefault(urlprefix, root);
-
+        this.urlmap = urlmap;
+        this.svcinfo = svcinfo;
         // Construct the list of usable files
         activesources = getFileList(root);
     }
@@ -84,7 +96,7 @@ public class FrontPage
         }
 
         File[] candidates = dir.listFiles();
-	Arrays.sort(candidates);
+        Arrays.sort(candidates);
         List<FileSource> activesources = new ArrayList<FileSource>();
         // Capture lists of files for each FileSource
         for(FileSource src : SOURCES) {
@@ -127,12 +139,17 @@ public class FrontPage
             html.append(TABLE_HEADER);
             for(File file : src.files) {
                 String name = file.getName();
-                String serverprefix = urlmap.mapPath(file.getAbsolutePath());
-                html.append(String.format(HTML_FORMAT, name,
-                    serverprefix, name,
-                    serverprefix, name,
-                    serverprefix, name,
-                    serverprefix, name));
+                String absname;
+                try {
+                    absname = file.getCanonicalPath();
+                } catch (IOException ioe) {
+                    throw new DapException(ioe);
+                }
+                URLMap.Result result = urlmap.mapPath(absname);
+                String urlpath = this.svcinfo.getServer() + result.prefix + result.suffix; // append remainder not used by mappath
+                String line = String.format(HTML_FORMAT, name,
+                    urlpath, urlpath, urlpath, urlpath);
+                html.append(line);
             }
             html.append(TABLE_FOOTER);
         }
@@ -144,10 +161,10 @@ public class FrontPage
     // HTML prefix and suffix
     // (Remember that java does not allow Strings to cross lines)
     static final String HTML_PREFIX =
-        "<html>\n<head>\n<title>DAP4 Test Files</title>\n<meta http-equiv=\"Content-Type\" content=\"text/html\">\n</head>\n<body bgcolor=\"#FFFFFF\">\n";
+        "<html>\n<head>\n<title>DAP4 Test Files</title>\n<meta http-equiv=\"Content-Type\" content=\"text/html\">\n</meta>\n<body bgcolor=\"#FFFFFF\">\n";
 
     static final String HTML_HEADER1 = "<h1>DAP4 Test Files</h1>\n";
-    static final String HTML_HEADER2 = "<h2>http://"+REMOTESERVER+"/d4ts/</h2>\n<hr>\n";
+    static final String HTML_HEADER2 = "<h2>http://" + REMOTESERVER + "/d4ts/</h2>\n<hr>\n";
     static final String HTML_HEADER3 = "<h3>%s Based Test Files</h3>\n";
 
     static final String TABLE_HEADER = "<table>\n";
@@ -158,10 +175,10 @@ public class FrontPage
     static final String HTML_FORMAT =
         "<tr>\n"
             + "<td halign='right'><b>%s:</b></td>\n"
-            + "<td halign='center'><a href='%s/%s.dmr.txt'> DMR (TEXT) </a></div></td>\n"
-            + "<td halign='center'><a href='%s/%s.dmr'> DMR (XML) </a></div></td>\n"
-            + "<td halign='center'><a href='%s/%s.dap'> DAP </a></div></td>\n"
-            + "<td halign='center'><a href='%s/%s.dsr'> DSR </a></div></td>\n"
+            + "<td halign='center'><a href='%s.dmr.txt'> DMR (TEXT) </a></div></td>\n"
+            + "<td halign='center'><a href='%s.dmr'> DMR (XML) </a></div></td>\n"
+            + "<td halign='center'><a href='%s.dap'> DAP </a></div></td>\n"
+            + "<td halign='center'><a href='%s.dsr'> DSR </a></div></td>\n"
             + "</tr>\n";
 }
 

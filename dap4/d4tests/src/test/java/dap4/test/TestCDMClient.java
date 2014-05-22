@@ -1,9 +1,8 @@
 package dap4.test;
 
-import dap4.test.util.UnitTestCommon;
+import dap4.test.util.DapTestCommon;
 import ucar.httpclient.*;
 import ucar.nc2.dataset.NetcdfDataset;
-import ucar.nc2.util.net.*;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -12,9 +11,9 @@ import java.util.List;
 /**
  * Test at the NetcdfDataset level
  */
-public class TestCDMClient extends UnitTestCommon
+public class TestCDMClient extends DapTestCommon
 {
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
 
     static final boolean NCDUMP = true; // Use NcDumpW instead of NCPrint
 
@@ -25,7 +24,7 @@ public class TestCDMClient extends UnitTestCommon
     //////////////////////////////////////////////////
     // Constants
 
-    static final String DATADIR = "tests/src/test/data"; // relative to opuls root
+    static final String DATADIR = "d4tests/src/test/data"; // relative to dap4 root
     static final String TESTDATADIR = DATADIR + "/resources/TestCDMClient";
     static final String BASELINEDIR = TESTDATADIR + "/baseline";
     static final String TESTINPUTDIR = TESTDATADIR + "/testinput";
@@ -115,15 +114,6 @@ public class TestCDMClient extends UnitTestCommon
     //////////////////////////////////////////////////
     // Instance variables
 
-    // System properties
-
-    boolean prop_diff = true;
-    boolean prop_baseline = false;
-    boolean prop_visual = false;
-    boolean prop_debug = DEBUG;
-    String prop_server = null;
-
-
     // Test cases
 
     List<ClientTest> alltestcases = new ArrayList<ClientTest>();
@@ -154,9 +144,9 @@ public class TestCDMClient extends UnitTestCommon
     {
         super(name);
         setSystemProperties();
-        this.root = getRoot();
+        this.root = getDAP4Root();
         if(this.root == null)
-            throw new Exception("Opuls root cannot be located");
+            throw new Exception("dap4 root cannot be located");
         if(this.root.charAt(0) != '/')
             this.root = "/" + this.root; // handle problem of windows paths
         this.datasetpath = this.root + "/" + TESTINPUTDIR;
@@ -174,7 +164,7 @@ public class TestCDMClient extends UnitTestCommon
     chooseTestcases()
     {
         if(true) {
-            chosentests = locate("test_struct_array.syn");
+            chosentests = locate("test_opaque.nc");
         } else {
             for(ClientTest tc : alltestcases)
                 chosentests.add(tc);
@@ -304,21 +294,6 @@ public class TestCDMClient extends UnitTestCommon
 
     //////////////////////////////////////////////////
     // Utility methods
-
-    /**
-     * Try to get the system properties
-     */
-    void setSystemProperties()
-    {
-        prop_diff = (System.getProperty("nodiff") == null);
-        prop_baseline = (System.getProperty("baseline") != null);
-        prop_visual = (System.getProperty("visual") != null);
-        if(System.getProperty("debug") != null)
-            prop_debug = true;
-        prop_server = System.getProperty("server");
-        if(prop_diff && prop_baseline)
-            prop_diff = false;
-    }
 
     //Locate the test cases with given prefix
     List<ClientTest>

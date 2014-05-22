@@ -42,10 +42,11 @@ abstract public class DapCache
     open(String path)
         throws IOException
     {
-        int lrusize = lru.size();
+         int lrusize = lru.size();
         for(int i = lrusize - 1;i >= 0;i--) {
             DSP dsp = lru.get(i);
-            if(dsp.getPath() == path) {
+            String dsppath = dsp.getPath();
+            if(dsppath.equals(path)) {
                 // move to the front of the queue to maintain LRU property
                 lru.remove(i);
                 lru.add(dsp);

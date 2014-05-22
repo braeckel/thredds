@@ -1,11 +1,10 @@
 package dap4.test;
 
-import junit.framework.TestCase;
+import dap4.test.util.DapTestCommon;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
-import dap4.test.util.UnitTestCommon;
 
-public class TestDap4All extends UnitTestCommon
+public class TestDap4All extends DapTestCommon
 {
 
 
@@ -23,13 +22,13 @@ public class TestDap4All extends UnitTestCommon
     protected Class[] testclasses = new Class[]{
         TestParserDMR.class,
         TestParserCE.class,
-        TestH5Iosp.class,
         TestNc4Iosp.class,
         TestServlet.class,
         TestServletConstraints.class,
         TestCDMClient.class,
         TestDSR.class,
 /*    not yet testable
+TestH5Iosp.class,
 TestFrontPage.java
 TestHyrax.java
 TestSerial.java

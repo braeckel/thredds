@@ -31,7 +31,6 @@ public class DapSerializer
     protected OutputStream stream = null;
     protected SerialWriter writer = null;
     protected DSP dsp = null;
-    protected DapDataset dmr = null;
     protected DataDataset data = null;
     protected CEConstraint ce = null;
     protected ByteOrder order = null;
@@ -56,7 +55,6 @@ public class DapSerializer
         throws IOException
     {
         this.dsp = dsp;
-        this.dmr = dsp.getDMR();
         this.order = order;
         this.stream = stream;
         this.data = dsp.getDataDataset();
@@ -64,13 +62,12 @@ public class DapSerializer
     }
 
     public void
-    write()
+    write(DapDataset dmr)
         throws IOException
     {
         writer = new SerialWriter(this.stream, this.order);
-        writer.startDataset();
         // Iterate over the top-level variables in the constraint
-        for(DapVariable var : this.dmr.getTopVariables()) {
+        for(DapVariable var : dmr.getTopVariables()) {
             DataVariable dv = data.getVariableData(var);
             if(!ce.references(var))
                 continue;
@@ -78,7 +75,6 @@ public class DapSerializer
                 throw new DapException("DapSerializer: cannot find  Variable data " + var.getFQN());
             writeVariable(var, dv);
         }
-        writer.endDataset();
     }
 
     //////////////////////////////////////////////////
@@ -138,9 +134,9 @@ public class DapSerializer
                 // get the constrained slices
                 slices = ce.getVariableSlices(dapvar);
                 if(slices == null)
-                    throw new DataException("Unknown variable: "+dapvar.getFQN());
+                    throw new DataException("Unknown variable: " + dapvar.getFQN());
                 long count = DapUtil.sliceProduct(slices);
-                Odometer odom = new Odometer(slices,dapvar.getDimensions());
+                Odometer odom = new Odometer(slices, dapvar.getDimensions());
                 if(DapUtil.hasStrideOne(slices)) {
                     Object vector = Dap4Util.createVector(basetype.getPrimitiveType(), count);
                     dav.read(odom.index(), odom.totalSize(), vector);
@@ -258,9 +254,9 @@ public class DapSerializer
             // Get the active set of slices for this variable
             List<Slice> slices = ce.getVariableSlices(dapvar);
             if(slices == null)
-                throw new DataException("Undefined variable: "+dapvar);
+                throw new DataException("Undefined variable: " + dapvar);
             long count = DapUtil.sliceProduct(slices);
-            DataCompound[] dc = new DataCompound[(int)count];
+            DataCompound[] dc = new DataCompound[(int) count];
             dca.read(slices, dc);
             for(int i = 0;i < count;i++) {
                 writeCompound(dapvar, dc[i]);
@@ -284,7 +280,6 @@ public class DapSerializer
     {
         try {
             DapSequence dapvar = (DapSequence) vv;
-            assert (dapvar.getRank() == 0);
             for(DapVariable field : dapvar.getFields()) {
                 if(!ce.references(field)) continue; // not in the view
                 DataVariable dv = dr.readfield(field.getShortName());
@@ -309,6 +304,11 @@ public class DapSerializer
         throws DataException
     {
         long nrecs = ds.getRecordCount();
+        try {
+            writer.writeObject(DapType.UINT64, nrecs);
+        } catch (IOException ioe) {
+            throw new DataException(ioe);
+        }
         for(int i = 0;i < nrecs;i++)
             writeRecord(dapvar, ds.readRecord(i));
     }
