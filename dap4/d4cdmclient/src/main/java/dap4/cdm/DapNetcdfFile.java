@@ -4,6 +4,7 @@
 
 package dap4.cdm;
 
+import dap4.core.util.DapUtil;
 import dap4.cdmshared.CDMUtil;
 import dap4.cdmshared.NodeMap;
 import dap4.dap4shared.*;
@@ -98,7 +99,7 @@ public class DapNetcdfFile extends ucar.nc2.NetcdfFile
         super();
         this.originalurl = url;
         // url may have leading dap4:
-        List<String> allprotocols = getProtocols(url);
+        List<String> allprotocols = DapUtil.getProtocols(url);
         switch (allprotocols.size()) {
         case 0:
             url = "file://" + url;

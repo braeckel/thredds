@@ -348,34 +348,6 @@ abstract public class DapUtil // Should only contain static methods
     }
 
 
-    /**
-     * Return a list of the protocols at the print of a url.
-     * There might be multiple ones (e.g. dap4:http). Also
-     * note that this will be "fooled" by Windows paths containing
-     * drive letters (e.g. "C:/...").
-     *
-     * @param url the url to test
-     * @return list of the protocols at the front of the url.
-     * Note that the protocol elements will not have a trailing colon.
-     */
-    static final String protocol_re = "[a-zA-Z0-9_-]+";
-
-    static public String[] getProtocols(String url)
-    {
-        String[] pieces = url.split("[:]");
-        if(pieces.length > 1) {
-            for(int i = 0;i < pieces.length;i++) {
-                if(!pieces[i].matches(protocol_re)) {
-                    String[] protos = new String[i];
-                    for(int j = 0;j < i;j++)
-                        protos[j] = pieces[j];
-                    return protos;
-                }
-            }
-        }
-        return new String[0];
-    }
-
     static public long dimProduct(List<DapDimension> dimset) // dimension crossproduct
     {
         long count = 1;
@@ -516,6 +488,40 @@ abstract public class DapUtil // Should only contain static methods
         }
         return false;
     }
+
+    /**
+     *  Return the set of leading protocols for a url; may be more than one.
+     * @param url  the url whose protocols to return
+     * @return list of leading protocols without the trailing :
+     */
+    static public List<String>
+    getProtocols(String url)
+    {
+        // break off any leading protocols;
+        // there may be more than one.
+        // Watch out for Windows paths starting with a drive letter.
+        // Each protocol does not have trailing :
+
+        List<String> allprotocols = new ArrayList<>(); // all leading protocols upto path or host
+
+        // Note, we cannot use split because of the context sensitivity
+        StringBuilder buf = new StringBuilder(url);
+        for(;;) {
+            int index = buf.indexOf(":");
+            if(index < 0) break; // no more protocols
+            String protocol = buf.substring(0,index);
+            // Check for windows drive letter
+            if(index == 1 //=>|protocol| == 1
+                && "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                    .indexOf(buf.charAt(0)) >= 0) break;
+            allprotocols.add(protocol);
+            buf.delete(0,index+1); // remove the leading protocol
+            if(buf.indexOf("/") == 0)
+                break; // anything after this is not a protocol
+        }
+        return allprotocols;
+    }
+
 
 } // class DapUtil
 
