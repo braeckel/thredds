@@ -237,7 +237,9 @@ public class Dap4EventHandler extends SaxEventHandler
             Locator loc = getLocator();
             Dap4ParserBody parser = (Dap4ParserBody)this;
             Bison.Position pos = new Bison.Position(loc);
-            Dap4Parser.Location yyloc = new Dap4Parser.Location(pos);
+	    // Note: The location class in the Java skeleton needs to be static
+            // otherwise we are reduced to this abomination
+            Dap4Parser.Location yyloc = parser.new Location(pos);
             status = parser.push_parse(yytoken, saxtoken, yyloc);
         } catch (Exception e) {
             throw new SAXException(e);
