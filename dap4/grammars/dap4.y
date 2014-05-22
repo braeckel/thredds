@@ -5,7 +5,6 @@
 
 %define api.push-pull push
 %define api.position.type {Bison.Position}
-%define api.location.type {Bison.Location}
 %define abstract
 %define package {dap4.core.dmr.parser}
 %define parser_class_name {Dap4ParserBody}
@@ -22,7 +21,7 @@ public Object getLVal() {return null;}
 public int yylex() {return 0;}
 public Bison.Position getStartPos() {return null;}
 public Bison.Position getEndPos() {return null;}
-public void yyerror(Bison.Location loc, String s)
+public void yyerror(Location loc, String s)
 {
 System.err.println(s);
 System.err.printf("near %s\n",getLocator());

@@ -18,7 +18,7 @@ Comment out in case we are using an older version of bison
 %code imports {
 import dap4.core.util.Slice;
 import dap4.core.dmr.parser.ParseException;
-import static dap4.ce.CEAST.*;
+import dap4.ce.CEAST;
 }
 
 %code {
