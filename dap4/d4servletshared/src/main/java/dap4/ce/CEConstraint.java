@@ -153,30 +153,36 @@ public class CEConstraint implements Constraint
         }
     }
 
-
     static protected class Segment
     {
+        CEConstraint parent;
         DapVariable var;
-        List<Slice> slices; // from the projection
-        List<DapDimension> dimset; // The dimension objects derived from the slices
+        List<Slice> slices; // projections slices for this variable
+        List<DapDimension> dimset; // dimensions for the variable; including
+        // redefs and anonymous derived from slices
         CEAST filter;
 
         Segment(DapVariable var)
         {
-            this(var, null, null);
-        }
-
-        Segment(DapVariable var, List<Slice> slices)
-        {
-            this(var, slices, null);
-        }
-
-        Segment(DapVariable var, List<Slice> slices, CEAST filter)
-        {
             this.var = var;
+            this.slices = null; // added later
+            this.filter = null; // added later
+            this.dimset = null; // added later
+        }
+
+        void setDimset(List<DapDimension> dimset)
+        {
+            this.dimset = dimset;
+        }
+
+        void setSlices(List<Slice> slices)
+        {
             this.slices = slices;
+        }
+
+        void setFilter(CEAST filter)
+        {
             this.filter = filter;
-	    List<DapDimension> dims = var.getDimensions();	 
         }
 
         public String toString()
@@ -466,10 +472,10 @@ public class CEConstraint implements Constraint
 
     protected List<Slice> getConstrainedSlices(DapVariable var)
     {
-        int index = findVariable(var);
-        if (index < 0)
+        Segment seg = findSegment(var);
+        if (seg == null)
             return null;
-        return this.segments.get(index).slices;
+        return seg.slices;
     }
 
     public void addRedef(DapDimension dim, Slice slice)
@@ -479,8 +485,12 @@ public class CEConstraint implements Constraint
 
     public void addVariable(DapVariable var, List<Slice> slices)
     {
-        if (findVariable(var) < 0)
-            this.variables.add(new Segment(var, slices));
+        if (findVariable(var) < 0) {
+	    Segment segment = new Segment(var);
+            segment.setSlices(slices);
+            this.segments.add(segment);
+            this.variables.add(var);
+	}
     }
 
     public void addAttribute(DapNode node, DapAttribute attr)
@@ -507,8 +517,8 @@ public class CEConstraint implements Constraint
     {
         StringBuilder buf = new StringBuilder();
         boolean first = true;
-        for (int i = 0; i < variables.size(); i++) {
-            Segment seg = variables.get(i);
+        for (int i = 0; i < segments.size(); i++) {
+            Segment seg = segments.get(i);
             if (!seg.var.isTopLevel())
                 continue;
             if (!first) buf.append(";");
@@ -553,8 +563,8 @@ public class CEConstraint implements Constraint
     {
         StringBuilder buf = new StringBuilder();
         boolean first = true;
-        for (int i = 0; i < variables.size(); i++) {
-            Segment seg = variables.get(i);
+        for (int i = 0; i < segments.size(); i++) {
+            Segment seg = segments.get(i);
             if (!seg.var.isTopLevel())
                 continue;
             if (!first) buf.append(";");
@@ -892,6 +902,7 @@ public class CEConstraint implements Constraint
                 continue;
             List<Slice> slices = seg.slices;
             List<DapDimension> orig = seg.var.getDimensions();
+            List<DapDimension> newdims = new ArrayList<>();
             // If the slice list is short then pad it with
             // default slices
             if (slices == null)
@@ -905,12 +916,15 @@ public class CEConstraint implements Constraint
                 Slice slice = slices.get(j);
                 DapDimension dim0 = orig.get(j);
                 DapDimension newdim = redef.get(dim0);
-                if (newdim == null) newdim = dim0;
+                if (newdim == null)
+		    newdim = dim0;
                 if (slice.incomplete())  // fill in the undefined last value
                     slice.complete(newdim);
                 Slice newslice = null;
-                if (!slice.isConstrained()) {
-                    // replace with a new slice from the dim
+                if(slice.isConstrained()) {
+		    // Construct an anonymous dimension for this slice
+		    newdim = new DapDimension(slice.getCount());
+		} else { // replace with a new slice from the dim
                     newslice = new Slice().fill(newdim);
                     if (newslice != null) {
                         // track set of referenced non-anonymous dimensions
@@ -918,7 +932,10 @@ public class CEConstraint implements Constraint
                         slices.set(j, newslice);
                     }
                 }
+		// record the dimension per variable
+		newdims.add(newdim);
             }
+	    seg.setDimset(newdims);
         }
     }
 
@@ -928,11 +945,11 @@ public class CEConstraint implements Constraint
      */
     protected void computeenums()
     {
-        for (int i = 0; i < segments.size(); i++) {
-            Segment seg = segments.get(i);
-            if (seg.var.getSort() != DapSort.ATOMICVARIABLE)
+        for (int i = 0; i < variables.size(); i++) {
+            DapVariable var = variables.get(i);
+            if (var.getSort() != DapSort.ATOMICVARIABLE)
                 continue;
-            DapType daptype = seg.var.getBaseType();
+            DapType daptype = var.getBaseType();
             if (!daptype.isEnumType())
                 continue;
             if (!this.enums.contains((DapEnum) daptype))
