@@ -32,4 +32,8 @@
     <Dim name="/d10"/>
     <Dim name="/d10"/>
   </Structure>
+  <Sequence name="seq">
+      <Int32 name="i32"/>
+      <Int16 name="i16"/>
+  </Sequence>
 </Dataset>

@@ -16,19 +16,69 @@ import java.util.*;
  * A Constraint is a structure
  * containing a parsed representation
  * of a constraint expression.
+ * Its purpose is define a subset of interest of a dataset.
  * <p/>
- * The constraint, with respect to some underlying DMR,
- * defines a subset view over that DMR in that it specifies
+ * The constraint object is defined with respect to some underlying DMR.
+ * It defines a subset view over that DMR in that it specifies
  * a set of declarations (variables, enums, dimensions, groups)
  * to be included.
  * For each such variable, the constraint specifies
  * any overriding of the dimensions of the variables.
- * The DMR printer and the serializer access the constraint
- * to determine what to put out.
  * Additionally, each variable (if appropriate) may have a filter expr.
+ * <p/>
+ * Thus, there are three 'sub' constraints within a full constraint.
+ * 1. Referencing - is a variable from the underlying dataset
+ * included in the constraint, directly (by
+ * or indirectly: e.g. fields of a structure when only
+ * the structure is referenced
+ * 2. Projection - the actual values of a variable to be included
+ * in the constraint; this is specified by a triple [start:stride:stop]
+ * for each dimension of a variable.
+ * 3. Selection (aka filters) - A predicate over the scalar fields
+ * of a row of a Sequence; if it evaluates to true, then that
+ * row matches the constraint.
+ * <p/>
+ * There are multiple ways to effect a constraint.
+ * 1. Generate and test mode: the constraint is asked if a given
+ * element matches the constraint. E.g.
+ * a. For referencing, one might ask the constraint
+ * if a given variable or field is in the constraint
+ * b. For a projection filter, one might ask the constraint
+ * if a given set of dimension indices match the projection.
+ * c. For a selection filter, one might ask the constraint
+ * if a given sequence row matches the filter predicate
+ * 2. Iteration mode: the constraint provides an iterator
+ * that returns the elements matching the constraint. E.g.
+ * a. For referencing, the iterator would return all the
+ * variables and fields referenced in the constraint.
+ * b. For a projection filter, the iterator would return
+ * the successive sets of indices of the projection,
+ * or it could return the actual matching value.
+ * c. For a selection filter, the iterator would return
+ * either the row indices or the actual rows of a sequence
+ * that matched the filter predicate
+ * <p/>
+ * 3. Read mode: Sometimes, it may be more efficient to let the
+ * DataVariable object handle the constraint more directly. E.g.
+ * a. For example, if the data variable was backed by a netcdf
+ * file, then passing in the complete projection might be more
+ * efficient than pulling values 1 by 1.
+ * b. Similarly, if the sequence object had an associated btree,
+ * then it would be more efficient to allow the sequence object
+ * to evaluate the filter using the btree. Note that this
+ * requires analysis of the filter expression to see if the
+ * btree is usable.
+ * <p/>
+ * Ideally, we would allow all three modes, but for now, only
+ * generate-and-test and iteration are implemented, and only a subset
+ * of those. Specifically, iteration is provided for referencing,
+ * projection, and selection (filters). Generate-and-test is provided for
+ * referencing and selection. It is not provided for projection
+ * (for now) because it essentially requires the inverse of iteration
+ * and that is fairly tricky.
  */
 
-public class CEConstraint
+public class CEConstraint implements Constraint
 {
     //////////////////////////////////////////////////
     // Constants
@@ -38,6 +88,7 @@ public class CEConstraint
 
     static final String LBRACE = "{";
     static final String RBRACE = "}";
+
 
     //////////////////////////////////////////////////
     // Type Decls
@@ -72,7 +123,7 @@ public class CEConstraint
         }
 
         @Override
-        public List<Slice> getVariableSlices(DapVariable var)
+        public List<Slice> getConstrainedSlices(DapVariable var)
         {
             try {
                 return DapUtil.dimsetSlices(var.getDimensions());
@@ -82,7 +133,6 @@ public class CEConstraint
         }
 
 
-        @Override
         public boolean
         references(DapNode node)
         {
@@ -103,10 +153,12 @@ public class CEConstraint
         }
     }
 
+
     static protected class Segment
     {
         DapVariable var;
-        List<Slice> slices;
+        List<Slice> slices; // from the projection
+        List<DapDimension> dimset; // The dimension objects derived from the slices
         CEAST filter;
 
         Segment(DapVariable var)
@@ -124,6 +176,7 @@ public class CEConstraint
             this.var = var;
             this.slices = slices;
             this.filter = filter;
+	    List<DapDimension> dims = var.getDimensions();	 
         }
 
         public String toString()
@@ -142,7 +195,7 @@ public class CEConstraint
         }
     }
 
-    static public class Filter implements Iterator<DataRecord>
+    static protected class FilterIterator implements Iterator<DataRecord>
     {
         protected DapSequence seq;
         protected DataSequence data;
@@ -152,7 +205,7 @@ public class CEConstraint
         protected int recno;
         protected DataRecord current;
 
-        public Filter(DapSequence seq, DataSequence data, CEAST filter)
+        public FilterIterator(DapSequence seq, DataSequence data, CEAST filter)
         {
             this.filter = filter;
             this.seq = seq;
@@ -198,16 +251,16 @@ public class CEConstraint
         }
 
         /**
-	 * Evaluate a filter with respect to a Sequence record.
-	 * Assumes the filter has been canonicalized so that
-	 * the lhs is a variable.
-	 *
-	 * @param seq the template
+         * Evaluate a filter with respect to a Sequence record.
+         * Assumes the filter has been canonicalized so that
+         * the lhs is a variable.
+         *
+         * @param seq    the template
          * @param record the record to evaluate
+         * @throws DapException
          * @parem expr the filter
-	 * @returns true if the filter evaluates to true for this record
-	 * @throws DapException
-	 */
+         * @returns true if the filter evaluates to true for this record
+         */
         protected boolean
         matches(DapSequence seq, DataRecord record, CEAST expr)
                 throws DapException
@@ -224,10 +277,10 @@ public class CEConstraint
                         Object rvalue = null;
                         assert (expr.lhs.sort == CEAST.Sort.SEGMENT);
                         lvalue = eval(seq, record, expr.lhs.name);
-		        if(expr.rhs.sort == CEAST.Sort.SEGMENT)
+                        if (expr.rhs.sort == CEAST.Sort.SEGMENT)
                             rvalue = eval(seq, record, expr.rhs.name);
-			else
-			    rvalue = expr.rhs.value;
+                        else
+                            rvalue = expr.rhs.value;
                         int comparison = compare(lvalue, rvalue);
                         switch (expr.op) {
                         case LT:
@@ -289,6 +342,49 @@ public class CEConstraint
         }
     }
 
+    static protected class ReferenceIterator implements Iterator<DapNode>
+    {
+
+        //////////////////////////////////////////////////
+        // Instance Variables
+
+        protected CEConstraint ce;
+        protected DapSort sort;
+
+        List<DapNode> list = new ArrayList<>();
+
+        /**
+         * @param ce the constraint over which to iterate
+         * @throws DapException
+         */
+        public ReferenceIterator(CEConstraint ce)
+                throws DapException
+        {
+            this.ce = ce;
+            this.sort = sort;
+            list.addAll(ce.dimrefs);
+            list.addAll(ce.enums);
+            list.addAll(ce.variables);
+        }
+
+        //////////////////////////////////////////////////
+        // Iterator Interface
+
+        public boolean hasnext()
+        {
+        }
+
+        public DapNode next()
+        {
+        }
+
+        public void remove()
+        {
+            throw new UnsupportedOperationException();
+        }
+
+    }
+
     //////////////////////////////////////////////////
     // class variables and methods
 
@@ -304,15 +400,22 @@ public class CEConstraint
     // Information given to us by the compiler
     protected DapDataset dmr = null; // Underlying DMR
 
-    // "Map" of variables (at all levels) to be included -> associated slices
-    // modified by computdimensions().
-    // Note that we keep the original insertion order
+    /**
+     * "Map" of variables (at all levels) to be included
+     * Maps variables -> associated slices
+     * and is modified by computdimensions().
+     * Note that we keep the original insertion order
+     */
 
-    protected List<Segment> variables = new ArrayList<Segment>();
+    protected List<Segment> segments = new ArrayList<>();
+
+    /**
+     * Also keep a raw list of variables
+     */
+    protected List<DapVariable> variables = new ArrayList<>();
 
     // Track redefs
     protected Map<DapDimension, Slice> redefslice = new HashMap<DapDimension, Slice>();
-
 
     // Hold any extra attributes
     protected Map<DapNode, List<DapAttribute>> attributes = new HashMap<DapNode, List<DapAttribute>>();
@@ -322,16 +425,16 @@ public class CEConstraint
     protected Map<DapDimension, DapDimension> redef = new HashMap<DapDimension, DapDimension>();
 
     // list of all referenced original dimensions
-    protected List<DapDimension> dimrefs = new ArrayList<DapDimension>();
+    protected List<DapDimension> dimrefs = new ArrayList<>();
 
     // List of enumeration decls to be included
-    protected List<DapEnum> enums = new ArrayList<DapEnum>();
+    protected List<DapEnum> enums = new ArrayList<>();
 
     // List of group decls to be included
-    protected List<DapGroup> groups = new ArrayList<DapGroup>();
+    protected List<DapGroup> groups = new ArrayList<>();
 
     // List of referenced shared dimensions (including redefs)
-    protected List<DapDimension> refdims = new ArrayList<DapDimension>();
+    protected List<DapDimension> refdims = new ArrayList<>();
 
     protected boolean finished = false;
 
@@ -361,12 +464,12 @@ public class CEConstraint
         return redef.get(orig);
     }
 
-    public List<Slice> getVariableSlices(DapVariable var)
+    protected List<Slice> getConstrainedSlices(DapVariable var)
     {
         int index = findVariable(var);
         if (index < 0)
             return null;
-        return this.variables.get(index).slices;
+        return this.segments.get(index).slices;
     }
 
     public void addRedef(DapDimension dim, Slice slice)
@@ -417,35 +520,6 @@ public class CEConstraint
 
     //////////////////////////////////////////////////
     // API
-
-    public boolean
-    references(DapNode node)
-    {
-        boolean isref = false;
-        switch (node.getSort()) {
-        case DIMENSION:
-            DapDimension dim = this.redef.get((DapDimension) node);
-            if (dim == null) dim = (DapDimension) node;
-            isref = this.dimrefs.contains(dim);
-            break;
-        case ENUMERATION:
-            isref = (this.enums.contains((DapEnum) node));
-            break;
-        case ATOMICVARIABLE:
-        case GRID:
-        case SEQUENCE:
-        case STRUCTURE:
-            isref = (findVariable((DapVariable) node) >= 0);
-            break;
-        case GROUP:
-        case DATASET:
-            isref = (this.groups.contains((DapGroup) node));
-            break;
-        default:
-            break;
-        }
-        return isref;
-    }
 
     /**
      * Finish creating this Constraint.
@@ -538,30 +612,124 @@ public class CEConstraint
         buf.append(RBRACE);
     }
 
+
     //////////////////////////////////////////////////
-    // Filter evaluation
+    // Reference processing
 
     /**
-     * Filter evaluation is carried out through an iterator
-     * that can be called by e.g. a serializer.
+     * Reference X match
+     *
+     * @param node to test
+     * @return true if node is referenced by this constraint
+     */
+
+    public boolean
+    references(DapNode node)
+    {
+        boolean isref = false;
+        switch (node.getSort()) {
+        case DIMENSION:
+            DapDimension dim = this.redef.get((DapDimension) node);
+            if (dim == null) dim = (DapDimension) node;
+            isref = this.dimrefs.contains(dim);
+            break;
+        case ENUMERATION:
+            isref = (this.enums.contains((DapEnum) node));
+            break;
+        case ATOMICVARIABLE:
+        case GRID:
+        case SEQUENCE:
+        case STRUCTURE:
+            isref = (findVariable((DapVariable) node) >= 0);
+            break;
+        case GROUP:
+        case DATASET:
+            isref = (this.groups.contains((DapGroup) node));
+            break;
+        default:
+            break;
+        }
+        return isref;
+    }
+
+    /**
+     * Reference X Iterator
+     * Iterate over the variables and return
+     * those that are referenced. The order of
+     * return is preorder.
+     * Inputs:
+     * 1.  the variable whose slices are to be iterated.
+     *
+     * @param dataset
+     * @return ReferenceIterator
+     * @throws DapException if could not create.
+     */
+
+    public Odometer
+    referenceIterator(DapDataset dataset)
+            throws DapException
+    {
+        // Create the appropriate odometer for
+        // the slices of the variable
+        List<Slice> slices = DapUtil.dimsetSlices(var.getDimensions());
+        Odometer odom = new Odometer(slices);
+        return odom;
+    }
+
+    //////////////////////////////////////////////////
+    // Projection processing
+
+    /**
+     * Projection X match
+     * This is actually rather difficult because it requires
+     * sort of the inverse of an odometer. For this reason,
+     * It's implementation is deferred.
+     */
+
+    /**
+     * Projection X Iterator
+     * This basically returns an odometer that
+     * will iterate over the appropriate values.
+     *
+     * @param var over whose dimensions to iterate
+     * @throws DapException
+     */
+
+    public Odometer
+    projectionIterator(DapVariable var)
+            throws DapException
+    {
+        return new Odometer(getConstrainedSlices(var),
+    }
+
+    //////////////////////////////////////////////////
+    // Selection (Filter) processing
+
+    /**
+     * Selection X match
+     */
+
+    /**
+     * Selection X Iterator
+     * Filter evaluation using an iterator.
      * The iterator evaluates records from a sequence one-by-one
      * and returns the next one that matches the filter.
      * In order to evaluate a record, we need as input:
-     * 1.  the DapSequence from which
-     * the free variables in
-     * the filter are taken.
+     * 1.  the DapSequence from which the free
+     * variables in the filter are taken.
      * 2.  the DataRecord to evaluate
      *
      * @param dapseq
      * @param dataseq
      */
 
-    public Filter
+    public FilterIterator
     filterIterator(DapSequence dapseq, DataSequence dataseq)
+            throws DapException
     {
         // Locate the filter for this sequence
         Segment seg = findSegment(dapseq);
-        return new Filter(dapseq, dataseq, seg.filter);
+        return new FilterIterator(dapseq, dataseq, seg.filter);
     }
 
 
@@ -572,7 +740,7 @@ public class CEConstraint
     protected int findVariable(DapVariable var)
     {
         for (int i = 0; i < variables.size(); i++) {
-            if (variables.get(i).var == var)
+            if (variables.get(i) == var)
                 return i;
         }
         return -1;
@@ -580,9 +748,9 @@ public class CEConstraint
 
     protected Segment findSegment(DapVariable var)
     {
-        for (int i = 0; i < variables.size(); i++) {
-            if (variables.get(i).var == var)
-                return variables.get(i);
+        for (int i = 0; i < segments.size(); i++) {
+            if (segments.get(i).var == var)
+                return segments.get(i);
         }
         return null;
     }
@@ -620,14 +788,14 @@ public class CEConstraint
         // Create a queue of unprocessed leaf compounds
         Queue<DapVariable> queue = new ArrayDeque<DapVariable>();
         for (int i = 0; i < variables.size(); i++) {
-            Segment seg = variables.get(i);
-            if (!seg.var.isTopLevel())
+            DapVariable var = variables.get(i);
+            if (!var.isTopLevel())
                 continue;
             // prime the queue
-            if (seg.var.getSort() == DapSort.STRUCTURE || seg.var.getSort() == DapSort.SEQUENCE) {
-                DapStructure struct = (DapStructure) seg.var; // remember Sequence subclass Structure
+            if (var.getSort() == DapSort.STRUCTURE || var.getSort() == DapSort.SEQUENCE) {
+                DapStructure struct = (DapStructure) var; // remember Sequence subclass Structure
                 if (expansionCount(struct) == 0)
-                    queue.add(seg.var);
+                    queue.add(var);
             }
         }
         // Process the queue in prefix order
@@ -637,7 +805,8 @@ public class CEConstraint
             for (DapVariable field : dstruct.getFields()) {
                 if (findVariable(field) < 0) {
                     // Add field as leaf
-                    this.variables.add(new Segment(field));
+                    this.segments.add(new Segment(field));
+                    this.variables.add(field);
                 }
                 if (field.getSort() == DapSort.STRUCTURE || field.getSort() == DapSort.SEQUENCE) {
                     if (expansionCount((DapStructure) field) == 0)
@@ -672,6 +841,8 @@ public class CEConstraint
     /**
      * Compute dimension related information
      * using slicing and redef info.
+     * In effect, this is where projection constraints
+     * are applied
      * <p/>
      * Assume that the constraint compiler has given us the following info:
      * <ol>
@@ -715,8 +886,8 @@ public class CEConstraint
         }
 
         // Process each variable
-        for (int i = 0; i < variables.size(); i++) {
-            Segment seg = variables.get(i);
+        for (int i = 0; i < segments.size(); i++) {
+            Segment seg = segments.get(i);
             if (seg.var.getRank() == 0)
                 continue;
             List<Slice> slices = seg.slices;
@@ -757,8 +928,8 @@ public class CEConstraint
      */
     protected void computeenums()
     {
-        for (int i = 0; i < variables.size(); i++) {
-            Segment seg = variables.get(i);
+        for (int i = 0; i < segments.size(); i++) {
+            Segment seg = segments.get(i);
             if (seg.var.getSort() != DapSort.ATOMICVARIABLE)
                 continue;
             DapType daptype = seg.var.getBaseType();
@@ -777,7 +948,7 @@ public class CEConstraint
     {
         // 1. variables
         for (int i = 0; i < variables.size(); i++) {
-            DapVariable var = variables.get(i).var;
+            DapVariable var = variables.get(i);
             List<DapGroup> path = var.getGroupPath();
             for (DapGroup group : path) {
                 if (!this.groups.contains(group))

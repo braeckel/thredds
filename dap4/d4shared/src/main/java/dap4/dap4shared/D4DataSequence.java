@@ -50,7 +50,7 @@ public class D4DataSequence extends D4DataVariable implements DataSequence
      * @throws DataException
      */
     public D4DataSequence(D4DSP dsp, DapSequence dap, D4DataCompoundArray cdv, int index)
-        throws DataException
+            throws DataException
     {
         super(dsp, dap);
         this.dsp = dsp;
@@ -78,10 +78,10 @@ public class D4DataSequence extends D4DataVariable implements DataSequence
 
     @Override
     public DataRecord readRecord(long recordno)
-        throws DataException
+            throws DataException
     {
-        if(recordno < 0 || recordno >= records.size())
+        if (recordno < 0 || recordno >= records.size())
             throw new DataException("Illegal record index: " + recordno);
-        return records.get((int)recordno);
+        return records.get((int) recordno);
     }
 }

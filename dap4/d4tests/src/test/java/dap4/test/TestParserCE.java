@@ -102,7 +102,7 @@ public class TestParserCE extends DapTestCommon
     chooseTestcases()
     {
         if(true) {
-            chosentests = locate("s|i1<0");
+            chosentests = locate("/seq|i32<0");
         } else {
             for(TestSet tc : alltestsets)
                 chosentests.add(tc);
@@ -136,7 +136,7 @@ public class TestParserCE extends DapTestCommon
     //////////////////////////////////////////////////
     // Junit test method
 
-    public void testParser()
+    public void testParserCE()
         throws Exception
     {
         for(TestSet testset : chosentests) {
@@ -215,7 +215,7 @@ public class TestParserCE extends DapTestCommon
     main(String[] argv)
         throws Exception
     {
-        new TestParserCE("TestParserCE").testParser();
+        new TestParserCE("TestParserCE").testParserCE();
     }// main
 
 

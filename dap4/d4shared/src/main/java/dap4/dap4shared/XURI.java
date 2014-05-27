@@ -7,9 +7,12 @@ package dap4.dap4shared;
 import dap4.core.util.DapUtil;
 import dap4.core.util.Escape;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,9 +32,9 @@ public class XURI
     // Instance variables
 
     protected String originaluri = null;
-    protected String[] protocols = null;
+    protected List<String> protocols = null;
     protected String coreuri = null;
-    protected URI uri = null; //applied to coreurl
+    protected URL url = null; //applied to coreurl
 
     protected String[] allprotocols = null;
     protected String baseprotocol = null;
@@ -62,44 +65,52 @@ public class XURI
         // will look like it has a single character protocol
         // that is really the drive letter.
         this.protocols = DapUtil.getProtocols(path);
-        if(this.protocols.length == 0) {
+        if(this.protocols.size() == 0) {
             // pretend it is a file:
-            this.protocols = new String[]{"file"};
+            this.protocols.add("file");
             path = "file://" + path;
-        } else if(DapUtil.hasDriveLetter(this.protocols[0])) {
-            this.protocols = new String[]{"file"};
+        } else if(DapUtil.hasDriveLetter(this.protocols.get(0))) {
+            this.protocols.clear();
+            this.protocols.add("file");
             path = "file://" + path;
         }
 
         // compute the core URI
-        if(this.protocols.length == 0)
+        if(this.protocols.size() == 0)
             this.coreuri = path;
-        else if(this.protocols.length == 1)
+        else if(this.protocols.size() == 1)
             this.coreuri = path;
         else {//(this.protocols.length > 1
             int prefix = 0;
-            for(int i = 0;i < this.protocols.length - 1;i++)
-                prefix += (this.protocols[i] + ":").length();
+            for(int i = 0;i < this.protocols.size() - 1;i++)
+                prefix += (this.protocols.get(i) + ":").length();
             this.coreuri = path.substring(prefix);
         }
 
         // Make sure it parses
-        this.uri = new URI(this.coreuri);
+        // We use URL instead of URI because
+        // filter queries may contain "|" and this
+        // is not accepted by URI class.
+        try {
+            this.url = new URL(this.coreuri);
+        } catch (MalformedURLException mue) {
+            throw new URISyntaxException(this.coreuri,mue.getMessage());
+        }
 
         // Extract the parts of the uri so they can
         // be modified and later reassembled
-        String lastproto = this.protocols[this.protocols.length - 1];
+        String lastproto = this.protocols.get(this.protocols.size() - 1);
 
-        if(!lastproto.equals(canonical(this.uri.getScheme())))
-            throw new URISyntaxException(this.uri.toString(),
+        if(!lastproto.equals(canonical(this.url.getProtocol())))
+            throw new URISyntaxException(this.url.toString(),
                 String.format("malformed url: %s :: %s",
-                    lastproto, this.uri.getScheme()));
-        this.baseprotocol = this.protocols[this.protocols.length - 1];
-        this.userinfo = canonical(this.uri.getRawUserInfo());
-        this.host = canonical(this.uri.getRawAuthority()); // including port
-        this.path = canonical(this.uri.getRawPath());
-        this.query = canonical(this.uri.getRawQuery());
-        this.frag = canonical(this.uri.getRawFragment());
+                    lastproto, this.url.getProtocol()));
+        this.baseprotocol = this.protocols.get(this.protocols.size() - 1);
+        this.userinfo = canonical(this.url.getUserInfo());
+        this.host = canonical(this.url.getAuthority()); // including port
+        this.path = canonical(this.url.getPath());
+        this.query = canonical(this.url.getQuery());
+        this.frag = canonical(this.url.getRef());
 
         // Parse the raw query (before decoding)
         if(this.query != null) {
@@ -134,14 +145,14 @@ public class XURI
         return originaluri;
     }
 
-    public String[] getProtocols()
+    public List<String> getProtocols()
     {
         return this.protocols;
     }
 
     public String getLeadProtocol()
     {
-        return this.protocols[0];
+        return this.protocols.get(0);
     }
 
     public String getBaseProtocol()

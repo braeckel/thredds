@@ -432,7 +432,7 @@ public class DMRPrint
     {
         if(var.getRank() == 0) return;
         // Use the slices from the constraint to get the dimrefs
-        List<Slice> slices = ce.getVariableSlices(var);
+        List<Slice> slices = ce.getConstrainedSlices(var);
         if(slices == null)
             throw new DapException("Unknown variable: " + var);
         assert var.getRank() == slices.size();

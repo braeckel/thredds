@@ -35,6 +35,7 @@ dap4/d4cdmshared/src/main/java/dap4/cdmshared/CDMUtil.java
 dap4/d4cdmshared/src/main/java/dap4/cdmshared/NodeMap.java
 dap4/d4client/src/main/java/dap4/dap4/Dap4Print.java
 dap4/d4core/src/main/java/dap4/core/data/Data.java
+dap4/d4core/src/main/java/dap4/core/data/Constraint.java
 dap4/d4core/src/main/java/dap4/core/data/DataAtomic.java
 dap4/d4core/src/main/java/dap4/core/data/DataCompound.java
 dap4/d4core/src/main/java/dap4/core/data/DataCompoundArray.java

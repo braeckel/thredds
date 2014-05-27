@@ -56,31 +56,30 @@ public class TestFilters extends DapTestCommon
         String dataset;
         String constraint;
         boolean xfail;
-        String[] extensions;
         Dump.Commands template;
         String testinputpath;
         String baselinepath;
         int id;
         int rowcount = DEFAULTROWCOUNT;
 
-        ConstraintTest(int id, String dataset, String extensions, String ce)
+        ConstraintTest(int id, String dataset, String ce)
         {
-            this(id, dataset, extensions, 0, ce, null, true);
+            this(id, dataset, 0, ce, null, true);
         }
 
-        ConstraintTest(int id, String dataset, String extensions, String ce,
+        ConstraintTest(int id, String dataset, String ce,
                        Dump.Commands template)
         {
-            this(id, dataset, extensions, 0, ce, template, false);
+            this(id, dataset, 0, ce, template, false);
         }
 
-        ConstraintTest(int id, String dataset, String extensions, int rows, String ce,
+        ConstraintTest(int id, String dataset, int rows, String ce,
                        Dump.Commands template)
         {
-            this(id, dataset, extensions, rows, ce, template, false);
+            this(id, dataset, rows, ce, template, false);
         }
 
-        ConstraintTest(int id, String dataset, String extensions, int rows, String ce,
+        ConstraintTest(int id, String dataset, int rows, String ce,
                        Dump.Commands template, boolean xfail)
         {
             if(alltests[id] != null)
@@ -90,7 +89,6 @@ public class TestFilters extends DapTestCommon
             this.dataset = dataset;
             this.constraint = ce;
             this.xfail = xfail;
-            this.extensions = extensions.split(",");
             this.template = template;
             this.testinputpath
                 = root + "/" + TESTINPUTDIR + "/" + dataset;
@@ -171,7 +169,7 @@ public class TestFilters extends DapTestCommon
     chooseTestcases()
     {
         if(true) {
-            chosentests = locate("test_sequence_1.syn?s|i1<0");
+            chosentests = locate("test_sequence_1.syn?/s|i1<0");
         } else {
             for(ConstraintTest tc : alltestcases)
                 chosentests.add(tc);
@@ -183,7 +181,7 @@ public class TestFilters extends DapTestCommon
     {
         ConstraintTest.root = root;
         this.alltestcases.add(
-            new ConstraintTest(1, "test_sequence_1.syn", "dmr,dap", "s|i1<0",
+            new ConstraintTest(1, "test_sequence_1.syn", "/s|i1<0",
                 new Dump.Commands()
                 {
                     public void run(Dump printer) throws IOException
@@ -222,66 +220,7 @@ public class TestFilters extends DapTestCommon
         boolean pass = true;
         System.out.println("Testcase: " + testcase.toString());
         Generator.setRowCount(testcase.rowcount);
-
-        for(String extension : testcase.extensions) {
-            RequestMode ext = RequestMode.modeFor(extension);
-            switch (ext) {
-            case DMR:
-                pass = dodmr(testcase);
-                break;
-            case DAP:
-                pass = dodata(testcase);
-                break;
-            default:
-                assert (false);
-                if(!pass) break;
-            }
-            if(!pass) break;
-        }
-        return pass;
-    }
-
-    boolean
-    dodmr(ConstraintTest testcase)
-        throws Exception
-    {
-        boolean pass = true;
-        String url = testcase.makeurl(RequestMode.DMR);
-
-        // Create request and response objects
-        FakeServlet servlet = new FakeServlet(this.datasetpath);
-        FakeServletRequest req = new FakeServletRequest(url, servlet);
-        FakeServletResponse resp = new FakeServletResponse();
-
-        servlet.init();
-
-        // See if the servlet can process this
-        try {
-            servlet.doGet(req, resp);
-        } catch (Throwable t) {
-            System.out.println(testcase.xfail ? "XFail" : "Fail");
-            t.printStackTrace();
-            return testcase.xfail;
-        }
-
-        // Collect the output
-        FakeServletOutputStream fakestream = (FakeServletOutputStream) resp.getOutputStream();
-        byte[] byteresult = fakestream.toArray();
-
-        // Test by converting the raw output to a string
-
-        String sdmr = new String(byteresult, UTF8);
-        if(prop_visual)
-            visual(url, sdmr);
-        if(prop_baseline) {
-            writefile(testcase.baselinepath + ".dmr", sdmr);
-        } else if(prop_diff) { //compare with baseline
-            // Read the baseline file
-            String baselinecontent = readfile(testcase.baselinepath + ".dmr");
-            System.out.println("DMR Comparison:");
-            pass = compare(baselinecontent, sdmr);
-            System.out.println(pass ? "Pass" : "Fail");
-        }
+        pass = dodata(testcase);
         return pass;
     }
 

@@ -132,7 +132,7 @@ public class DapSerializer
                 writer.writeObject(basetype, dav.read(0));
             } else {// dimensioned
                 // get the constrained slices
-                slices = ce.getVariableSlices(dapvar);
+                slices = ce.getConstrainedSlices(dapvar);
                 if(slices == null)
                     throw new DataException("Unknown variable: " + dapvar.getFQN());
                 long count = DapUtil.sliceProduct(slices);
@@ -252,7 +252,7 @@ public class DapSerializer
                 return;
             }
             // Get the active set of slices for this variable
-            List<Slice> slices = ce.getVariableSlices(dapvar);
+            List<Slice> slices = ce.getConstrainedSlices(dapvar);
             if(slices == null)
                 throw new DataException("Undefined variable: " + dapvar);
             long count = DapUtil.sliceProduct(slices);
